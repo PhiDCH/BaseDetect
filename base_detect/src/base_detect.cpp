@@ -16,7 +16,7 @@ using namespace cv;
 
 /************************* model configuration ****************8*****************/
 
-const string modelPath = "/home/cros/catkin_ws/src/human_tracking_navigation/scripts/bytetrack_s.engine";
+const string modelPath = "/home/phidch/Downloads/vision-packages/bytetrack_s.engine";
 // static const int INPUT_W = 640, INPUT_H = 480, INPUT_C = 3, OUTPUT_SIZE = 16;
 // const char* INPUT_BLOB_NAME = "images", *OUTPUT_BLOB_NAME = "output";
 
@@ -35,14 +35,11 @@ void BASE_DETECT::Detector<outputType>::DoInfer (Mat& img) {
     Preprocess(img);
     CHECK(cudaMemcpyAsync(buffers[inputIndex], inputHost, inputC*inputH*inputW*sizeof(float), cudaMemcpyHostToDevice, stream));
     context->enqueue(maxBatchSize, buffers, stream, nullptr);
+    float *outputHost;
     CHECK(cudaMemcpyAsync(outputHost, buffers[outputIndex], outputSize*sizeof(float), cudaMemcpyDeviceToHost, stream));
-    Postprocess();
+    Postprocess(outputHost);
 }
 
-
-// class Tracking : public BASE_DETECT::Detector {
-    
-// };
 
 struct outputType {
     int i;
