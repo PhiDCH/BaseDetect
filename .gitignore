@@ -1,0 +1,12 @@
+*/build/*
+
+*.mp4
+*.jpg
+*.png
+
+.vscode/
+
+*.engine
+*.tar
+*.pth
+*.onnx
