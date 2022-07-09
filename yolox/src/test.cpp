@@ -1,4 +1,5 @@
 #include "yolox.h"
+#include "BYTETracker.h"
 
 
 /************************* model configuration ****************8*****************/

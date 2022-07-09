@@ -10,13 +10,13 @@ using namespace cv;
 using namespace std;
 
 // output type
-struct Object
+struct YoloxOutput
 {
     Rect_<float> rect;
     int label;
     float prob;
 };
-typedef Object OUTPUT_TYPE;
+typedef YoloxOutput OUTPUT_TYPE;
 
 // preprocess function
 Mat static_resize(Mat& img, int inputW, int inputH, float scale);
@@ -33,17 +33,17 @@ struct GridAndStride
 
 static void generate_grids_and_stride(int target_w, int target_h, vector<int>& strides, vector<GridAndStride>& grid_strides);
 
-static inline float intersection_area(Object& a, Object& b);
+static inline float intersection_area(YoloxOutput& a, YoloxOutput& b);
 
-static void qsort_descent_inplace(vector<Object>& faceobjects, int left, int right);
+static void qsort_descent_inplace(vector<YoloxOutput>& faceobjects, int left, int right);
 
-static void qsort_descent_inplace(vector<Object>& objects);
+static void qsort_descent_inplace(vector<YoloxOutput>& objects);
 
-static void nms_sorted_bboxes(vector<Object>& faceobjects, vector<int>& picked, float nms_threshold);
+static void nms_sorted_bboxes(vector<YoloxOutput>& faceobjects, vector<int>& picked, float nms_threshold);
 
-static void generate_yolox_proposals(vector<GridAndStride> grid_strides, float* feat_blob, float prob_threshold, vector<Object>& objects);
+static void generate_yolox_proposals(vector<GridAndStride> grid_strides, float* feat_blob, float prob_threshold, vector<YoloxOutput>& objects);
 
-void decode_outputs(float* prob, vector<Object>& objects, float scale, int img_w, int img_h, int inputW, int inputH);
+void decode_outputs(float* prob, vector<YoloxOutput>& objects, float scale, int img_w, int img_h, int inputW, int inputH);
 
 
 

@@ -6,7 +6,7 @@ option(CUDA_USE_STATIC_CUDA_RUNTIME OFF)
 add_compile_options(-std=c++11)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_BUILD_TYPE Debug)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Ofast -Wfatal-errors -D_MWAITXINTRIN_H_INCLUDED -fopenmp")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Ofast -Wfatal-errors -D_MWAITXINTRIN_H_INCLUDED -fopenmp")
 
 
 ## System dependencies are found with CMake's conventions
@@ -20,8 +20,8 @@ include_directories(
     ${Boost_INCLUDE_DIRS}
 )
 
-include_directories(include)
-link_directories(include)
+include_directories(include/ include/bytetrack/)
+link_directories(include/ include/bytrtrack/)
 
 include_directories(../base_detect/include)
 link_directories(../base_detect/include)

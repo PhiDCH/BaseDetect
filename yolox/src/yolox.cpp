@@ -5,15 +5,10 @@ using namespace std;
 using namespace nvinfer1;
 using namespace cv;
 
-#define DEVICE 0  // GPU id
-#define NMS_THRESH 0.7
-#define BBOX_CONF_THRESH 0.1
-
 
 /************************* model configuration ****************8*****************/
-// static const int INPUT_W = 640, INPUT_H = 480, INPUT_C = 3, OUTPUT_SIZE = 16;
-// const char* INPUT_BLOB_NAME = "images", *OUTPUT_BLOB_NAME = "output";
-
+#define NMS_THRESH 0.7
+#define BBOX_CONF_THRESH 0.1
 
 // preprocess function
 Mat static_resize(Mat& img, int inputW, int inputH, float scale) {
@@ -64,13 +59,13 @@ static void generate_grids_and_stride(int target_w, int target_h, vector<int>& s
     }
 }
 
-static inline float intersection_area(Object& a, Object& b)
+static inline float intersection_area(YoloxOutput& a, YoloxOutput& b)
 {
     Rect_<float> inter = a.rect & b.rect;
     return inter.area();
 }
 
-static void qsort_descent_inplace(vector<Object>& faceobjects, int left, int right)
+static void qsort_descent_inplace(vector<YoloxOutput>& faceobjects, int left, int right)
 {
     int i = left;
     int j = right;
@@ -106,7 +101,7 @@ static void qsort_descent_inplace(vector<Object>& faceobjects, int left, int rig
     }
 }
 
-static void qsort_descent_inplace(vector<Object>& objects)
+static void qsort_descent_inplace(vector<YoloxOutput>& objects)
 {
     if (objects.empty())
         return;
@@ -114,7 +109,7 @@ static void qsort_descent_inplace(vector<Object>& objects)
     qsort_descent_inplace(objects, 0, objects.size() - 1);
 }
 
-static void nms_sorted_bboxes(vector<Object>& faceobjects, vector<int>& picked, float nms_threshold)
+static void nms_sorted_bboxes(vector<YoloxOutput>& faceobjects, vector<int>& picked, float nms_threshold)
 {
     picked.clear();
 
@@ -128,12 +123,12 @@ static void nms_sorted_bboxes(vector<Object>& faceobjects, vector<int>& picked, 
 
     for (int i = 0; i < n; i++)
     {
-        Object& a = faceobjects[i];
+        YoloxOutput& a = faceobjects[i];
 
         int keep = 1;
         for (int j = 0; j < (int)picked.size(); j++)
         {
-            Object& b = faceobjects[picked[j]];
+            YoloxOutput& b = faceobjects[picked[j]];
 
             // intersection over union
             float inter_area = intersection_area(a, b);
@@ -148,7 +143,7 @@ static void nms_sorted_bboxes(vector<Object>& faceobjects, vector<int>& picked, 
     }
 }
 
-static void generate_yolox_proposals(vector<GridAndStride> grid_strides, float* feat_blob, float prob_threshold, vector<Object>& objects)
+static void generate_yolox_proposals(vector<GridAndStride> grid_strides, float* feat_blob, float prob_threshold, vector<YoloxOutput>& objects)
 {
     const int num_class = 1;
 
@@ -177,7 +172,7 @@ static void generate_yolox_proposals(vector<GridAndStride> grid_strides, float* 
             float box_prob = box_objectness * box_cls_score;
             if (box_prob > prob_threshold)
             {
-                Object obj;
+                YoloxOutput obj;
                 obj.rect.x = x0;
                 obj.rect.y = y0;
                 obj.rect.width = w;
@@ -193,8 +188,8 @@ static void generate_yolox_proposals(vector<GridAndStride> grid_strides, float* 
     } // point anchor loop
 }
 
-void decode_outputs(float* prob, vector<Object>& objects, float scale, int img_w, int img_h, int inputW, int inputH) {
-    vector<Object> proposals;
+void decode_outputs(float* prob, vector<YoloxOutput>& objects, float scale, int img_w, int img_h, int inputW, int inputH) {
+    vector<YoloxOutput> proposals;
     vector<int> strides = {8, 16, 32};
     vector<GridAndStride> grid_strides;
     generate_grids_and_stride(inputW, inputH, strides, grid_strides);
@@ -265,24 +260,3 @@ void BASE_DETECT::Detector<outputType>::DoInfer(Mat& img) {
     Postprocess(outputHost);
 }
 
-
-
-// int main () {
-//     /////// set device
-//     cudaSetDevice(DEVICE);
-//     // printf("Initial memory:");
-//     // printMemInfo();
-
-//     if (1) {
-//         printf("Initial memory:");
-//         printMemInfo();
-//         BASE_DETECT::Detector<OUTPUT_TYPE> Det1(modelPath);
-//         cout << "create engine ";
-//         printMemInfo();
-//     }
-
-//     cout << "destroy all ";
-//     printMemInfo();
-
-//     return 0;
-// }
