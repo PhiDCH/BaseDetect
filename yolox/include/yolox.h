@@ -1,27 +1,20 @@
 #pragma once
 
-#include <iostream> 
-#include <opencv2/opencv.hpp>
-#include <vector>
-
 #include "base_detect.h"
-
-using namespace cv;
-using namespace std;
 
 // output type
 struct YoloxOutput
 {
-    Rect_<float> rect;
+    cv::Rect_<float> rect;
     int label;
     float prob;
 };
 typedef YoloxOutput OUTPUT_TYPE;
 
 // preprocess function
-Mat static_resize(Mat& img, int inputW, int inputH, float scale);
+cv::Mat static_resize(cv::Mat& img, int inputW, int inputH, float scale);
 
-void blobFromImage(Mat& img, float *inputHost);
+void blobFromImage(cv::Mat& img, float *inputHost);
 
 // postprocess function
 struct GridAndStride

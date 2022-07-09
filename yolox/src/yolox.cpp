@@ -1,14 +1,22 @@
-#include "yolox.h"
+#include "base_detect.h"
 
 
-using namespace std;
-using namespace nvinfer1;
+// using namespace std;
+// using namespace nvinfer1;
 using namespace cv;
 
 
 /************************* model configuration ****************8*****************/
 #define NMS_THRESH 0.7
 #define BBOX_CONF_THRESH 0.1
+
+struct YoloxOutput
+{
+    cv::Rect_<float> rect;
+    int label;
+    float prob;
+};
+typedef YoloxOutput OUTPUT_TYPE;
 
 // preprocess function
 Mat static_resize(Mat& img, int inputW, int inputH, float scale) {
@@ -43,6 +51,13 @@ void blobFromImage(Mat& img, float *inputHost){
 }
 
 // postprocess function
+struct GridAndStride
+{
+    int grid0;
+    int grid1;
+    int stride;
+};
+
 static void generate_grids_and_stride(int target_w, int target_h, vector<int>& strides, vector<GridAndStride>& grid_strides)
 {
     for (auto stride : strides)
@@ -254,9 +269,8 @@ template <typename outputType>
 void BASE_DETECT::Detector<outputType>::DoInfer(Mat& img) {
     Preprocess(img);
     CHECK(cudaMemcpyAsync(buffers[inputIndex], inputHost, maxBatchSize*inputC*inputH*inputW*sizeof(float), cudaMemcpyHostToDevice, stream));
-    context->enqueue(maxBatchSize, buffers, stream, nullptr);
+    context->enqueueV2(buffers, stream, nullptr);
     float outputHost[maxBatchSize*outputSize];
     CHECK(cudaMemcpyAsync(outputHost, buffers[outputIndex], maxBatchSize*outputSize*sizeof(float), cudaMemcpyDeviceToHost, stream));
     Postprocess(outputHost);
 }
-

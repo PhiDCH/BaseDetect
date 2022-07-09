@@ -1,8 +1,7 @@
 #pragma once
 
-#include <iostream>
+
 #include <fstream>  
-#include <cassert>
 #include <memory>
 #include <vector>
 
@@ -13,7 +12,7 @@
 
 using namespace std;
 using namespace nvinfer1;
-using namespace cv;
+
 
 #define ONE_GBYTE (1024*1024*1024)
 #define ONE_MBYTE (1024*1024)
@@ -66,7 +65,7 @@ namespace BASE_DETECT {
 
         void *buffers[2];
         float *inputHost;
-        // float *outputHost;
+        
         vector<vector<outputType>> res;
 
         public:
@@ -75,9 +74,9 @@ namespace BASE_DETECT {
         // delete model and buffer
         ~Detector();
         
-        void Preprocess(Mat& img);
+        void Preprocess(cv::Mat& img);
         void Postprocess(float *outputHost);
-        void DoInfer(Mat& img);
+        void DoInfer(cv::Mat& img);
         vector<vector<outputType>> getResult() {
             return res;
         };
