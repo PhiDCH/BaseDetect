@@ -35,10 +35,12 @@ link_directories(/usr/local/cuda/lib64)
 include_directories(/usr/include/x86_64-linux-gnu/)
 link_directories(/usr/lib/x86_64-linux-gnu/)
 
+add_library(yolox src/yolox.cpp)
+
 file(GLOB My_Source_Files src/*.cpp)
 # add_executable(base_detect ${My_Source_Files})
-add_executable(yolox src/yolox.cpp)
-target_link_libraries(yolox
+add_executable(testYoloX src/test.cpp)
+target_link_libraries(testYoloX
   ${OpenCV_LIBRARIES}
   cudart
   nvinfer

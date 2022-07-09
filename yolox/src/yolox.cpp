@@ -1,8 +1,4 @@
-
-
-
-
-#include "base_detect.h"
+#include "yolox.h"
 
 
 using namespace std;
@@ -15,18 +11,11 @@ using namespace cv;
 
 
 /************************* model configuration ****************8*****************/
-
-const string modelPath = "../../bytetrack_s.engine";
 // static const int INPUT_W = 640, INPUT_H = 480, INPUT_C = 3, OUTPUT_SIZE = 16;
 // const char* INPUT_BLOB_NAME = "images", *OUTPUT_BLOB_NAME = "output";
-struct Object
-{
-    Rect_<float> rect;
-    int label;
-    float prob;
-};
-typedef Object OUTPUT_TYPE;
 
+
+// preprocess function
 Mat static_resize(Mat& img, int inputW, int inputH, float scale) {
     int unpad_w = scale * img.cols;
     int unpad_h = scale * img.rows;
@@ -59,13 +48,6 @@ void blobFromImage(Mat& img, float *inputHost){
 }
 
 // postprocess function
-struct GridAndStride
-{
-    int grid0;
-    int grid1;
-    int stride;
-};
-
 static void generate_grids_and_stride(int target_w, int target_h, vector<int>& strides, vector<GridAndStride>& grid_strides)
 {
     for (auto stride : strides)
@@ -253,8 +235,9 @@ void decode_outputs(float* prob, vector<Object>& objects, float scale, int img_w
     }
 }
 
-/************************* define model function here *********************/
 
+
+/************************* define model function here *********************/
 template <typename outputType>
 void BASE_DETECT::Detector<outputType>::Preprocess(Mat& img) {
     // resize
@@ -283,22 +266,23 @@ void BASE_DETECT::Detector<outputType>::DoInfer(Mat& img) {
 }
 
 
-int main () {
-    /////// set device
-    cudaSetDevice(DEVICE);
-    // printf("Initial memory:");
-    // printMemInfo();
 
-    if (1) {
-        printf("Initial memory:");
-        printMemInfo();
-        BASE_DETECT::Detector<OUTPUT_TYPE> Det1(modelPath);
-        cout << "create engine ";
-        printMemInfo();
-    }
+// int main () {
+//     /////// set device
+//     cudaSetDevice(DEVICE);
+//     // printf("Initial memory:");
+//     // printMemInfo();
 
-    cout << "destroy all ";
-    printMemInfo();
+//     if (1) {
+//         printf("Initial memory:");
+//         printMemInfo();
+//         BASE_DETECT::Detector<OUTPUT_TYPE> Det1(modelPath);
+//         cout << "create engine ";
+//         printMemInfo();
+//     }
 
-    return 0;
-}
+//     cout << "destroy all ";
+//     printMemInfo();
+
+//     return 0;
+// }
