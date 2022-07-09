@@ -26,6 +26,9 @@ link_directories(include)
 include_directories(../base_detect/include)
 link_directories(../base_detect/include)
 
+include_directories(../yolox/include)
+link_directories(../yolox/include)
+
 include_directories(${OpenCV_INCLUDE_DIRS})
 
 # cuda
@@ -35,12 +38,12 @@ link_directories(/usr/local/cuda/lib64)
 include_directories(/usr/include/x86_64-linux-gnu/)
 link_directories(/usr/lib/x86_64-linux-gnu/)
 
-add_library(yolox src/yolox.cpp)
+add_library(yolox ../yolox/src/yolox.cpp)
 
 file(GLOB My_Source_Files src/*.cpp)
 # add_executable(base_detect ${My_Source_Files})
-add_executable(testYoloX src/test.cpp)
-target_link_libraries(testYoloX
+add_executable(testBytetrack src/testBytetrack.cpp)
+target_link_libraries(testBytetrack
   ${OpenCV_LIBRARIES}
   cudart
   nvinfer
