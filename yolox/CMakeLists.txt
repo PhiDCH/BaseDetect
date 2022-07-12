@@ -52,16 +52,3 @@ install(
   FILES include/yolox.h
   DESTINATION include
 ) 
-
-
-# add_executable(testYolox src/test.cpp)
-# target_link_libraries(testYolox
-#   PUBLIC ${YOLOX}
-#   ${OpenCV_LIBRARIES}
-#   cudart
-#   nvinfer
-#   # Eigen3::Eigen
-# )
-
-
-# add_definitions(-O2 -pthread)

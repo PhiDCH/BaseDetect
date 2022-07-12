@@ -1,13 +1,8 @@
-
 #include "yolox.h"
 
 
 using namespace cv;
 
-
-/************************* model configuration ****************8*****************/
-// #define NMS_THRESH 0.7
-// #define BBOX_CONF_THRESH 0.1
 
 
 // preprocess function
@@ -195,49 +190,6 @@ static void generate_yolox_proposals(vector<GridAndStride> grid_strides, float* 
     } // point anchor loop
 }
 
-// void decode_outputs(float* prob, vector<YoloxOutput>& objects, float scale, int img_w, int img_h, int inputW, int inputH) {
-//     vector<YoloxOutput> proposals;
-//     vector<int> strides = {8, 16, 32};
-//     vector<GridAndStride> grid_strides;
-//     generate_grids_and_stride(inputW, inputH, strides, grid_strides);
-//     generate_yolox_proposals(grid_strides, prob,  BBOX_CONF_THRESH, proposals);
-//     //std::cout << "num of boxes before nms: " << proposals.size() << std::endl;
-
-//     qsort_descent_inplace(proposals);
-
-//     vector<int> picked;
-//     nms_sorted_bboxes(proposals, picked, NMS_THRESH);
-
-
-//     int count = picked.size();
-
-//     //std::cout << "num of boxes: " << count << std::endl;
-
-//     objects.resize(count);
-//     for (int i = 0; i < count; i++)
-//     {
-//         objects[i] = proposals[picked[i]];
-
-//         // adjust offset to original unpadded
-//         float x0 = (objects[i].rect.x) / scale;
-//         float y0 = (objects[i].rect.y) / scale;
-//         float x1 = (objects[i].rect.x + objects[i].rect.width) / scale;
-//         float y1 = (objects[i].rect.y + objects[i].rect.height) / scale;
-
-//         // clip
-//         x0 = std::max(std::min(x0, (float)(img_w - 1)), 0.f);
-//         y0 = std::max(std::min(y0, (float)(img_h - 1)), 0.f);
-//         x1 = std::max(std::min(x1, (float)(img_w - 1)), 0.f);
-//         y1 = std::max(std::min(y1, (float)(img_h - 1)), 0.f);
-
-//         objects[i].rect.x = x0;
-//         objects[i].rect.y = y0;
-//         objects[i].rect.width = x1 - x0;
-//         objects[i].rect.height = y1 - y0;
-//     }
-// }
-
-
 
 /************************* define model function here *********************/
 Yolox::Yolox(const string modelPath, float nms_thresh, float bbox_conf_thresh) : Detector(modelPath){
@@ -246,9 +198,11 @@ Yolox::Yolox(const string modelPath, float nms_thresh, float bbox_conf_thresh) :
     bbox_conf_thresh = bbox_conf_thresh;
 }
 
+
 Yolox::Yolox(const string modelPath) : Detector(modelPath){
     result.resize(maxBatchSize);
 }
+
 
 void Yolox::preprocess(Mat& img) {
     // resize

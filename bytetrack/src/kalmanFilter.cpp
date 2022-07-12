@@ -1,5 +1,5 @@
 #include "kalmanFilter.h"
-#include <Eigen/Cholesky>
+#include <eigen3/Eigen/Cholesky>
 
 namespace byte_kalman
 {
