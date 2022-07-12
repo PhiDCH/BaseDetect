@@ -10,11 +10,13 @@ const string modelPath = "../../bytetrack_s.engine";
 int main () {
     cudaSetDevice(DEVICE);
 
+
     printf("Initial memory:");
     printMemInfo();
-    BASE_DETECT::Detector<OUTPUT_TYPE> detector(modelPath);
+    Yolox detector(modelPath);
     cout << "create engine ";
     printMemInfo();
+
 
     // Mat img = imread("/home/cros/catkin_ws/src/1.jpg");
     // if (img.empty()) cout << "read img fail" << endl;
@@ -46,10 +48,10 @@ int main () {
         if (img.empty()) break;
 
         Mat img0 = img.clone();
-        detector.DoInfer(img0);
+        detector.doInfer(img0);
         // vector<STrack> output_stracks = tracker.update(detector.getResult()[0]);
 
-        auto output_det = detector.getResult()[0];
+        auto output_det = detector.result[0];
         for (int i = 0; i < output_det.size(); i++)
 		{
             rectangle(img, output_det[i].rect, Scalar(0,0,255), 2);

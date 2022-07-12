@@ -1,9 +1,7 @@
-// #include "base_detect.h"
+
 #include "yolox.h"
 
 
-// using namespace std;
-// using namespace nvinfer1;
 using namespace cv;
 
 
@@ -52,12 +50,12 @@ void blobFromImage(Mat& img, float *inputHost){
 }
 
 // postprocess function
-// struct GridAndStride
-// {
-//     int grid0;
-//     int grid1;
-//     int stride;
-// };
+struct GridAndStride
+{
+    int grid0;
+    int grid1;
+    int stride;
+};
 
 static void generate_grids_and_stride(int target_w, int target_h, vector<int>& strides, vector<GridAndStride>& grid_strides)
 {
@@ -249,8 +247,12 @@ void decode_outputs(float* prob, vector<YoloxOutput>& objects, float scale, int 
 
 
 /************************* define model function here *********************/
-template <typename outputType>
-void BASE_DETECT::Detector<outputType>::Preprocess(Mat& img) {
+Yolox::Yolox(const string modelPath) : Detector(modelPath){
+    result.resize(maxBatchSize);
+}
+
+
+void Yolox::preprocess(Mat& img) {
     // resize
     img_w = img.cols;
     img_h = img.rows;
@@ -261,17 +263,79 @@ void BASE_DETECT::Detector<outputType>::Preprocess(Mat& img) {
     blobFromImage(img, inputHost);
 }
 
-template <typename outputType>
-void BASE_DETECT::Detector<outputType>::Postprocess(float *outputHost) {
-    decode_outputs(outputHost, res[0], scale, img_w, img_h, inputW, inputH);
+
+void Yolox::postprocess(float *outputHost) {
+    decode_outputs(outputHost, result[0], scale, img_w, img_h, inputW, inputH);
 }
 
-template <typename outputType>
-void BASE_DETECT::Detector<outputType>::DoInfer(Mat& img) {
-    Preprocess(img);
+
+void Yolox::doInfer(Mat& img) {
+    preprocess(img);
     CHECK(cudaMemcpyAsync(buffers[inputIndex], inputHost, maxBatchSize*inputC*inputH*inputW*sizeof(float), cudaMemcpyHostToDevice, stream));
     context->enqueueV2(buffers, stream, nullptr);
     float outputHost[maxBatchSize*outputSize];
     CHECK(cudaMemcpyAsync(outputHost, buffers[outputIndex], maxBatchSize*outputSize*sizeof(float), cudaMemcpyDeviceToHost, stream));
-    Postprocess(outputHost);
+    postprocess(outputHost);
 }
+
+
+// /************************* model configuration ****************8*****************/
+// #define DEVICE 0  // GPU id
+// const string modelPath = "/home/phidch/Downloads/vision-packages/BaseDetect/bytetrack_s.engine";
+
+// int main () {
+//     ///// set device
+//     cudaSetDevice(DEVICE);
+
+//     printf("Initial memory:");
+//     printMemInfo();
+//     Yolox Det1(modelPath);
+//     cout << "create engine ";
+//     printMemInfo();
+
+
+
+//     const string input_video_path = "../../palace.mp4";
+
+//     VideoCapture cap(input_video_path);
+//     if (!cap.isOpened()) {
+//         cout << "video is empty" << endl;
+//         return 0;
+//     }
+
+//     int img_w = cap.get(CAP_PROP_FRAME_WIDTH);
+// 	int img_h = cap.get(CAP_PROP_FRAME_HEIGHT);
+//     int fps = cap.get(CAP_PROP_FPS);
+//     // long nFrame = static_cast<long>(cap.get(CAP_PROP_FRAME_COUNT));
+//     Mat img;
+//     VideoWriter writer("../../demo.mp4", VideoWriter::fourcc('m', 'p', '4', 'v'), fps, Size(img_w, img_h));
+
+
+//     // int frame_id = 0, total_ms = 0;
+//     while (cap.read(img)) {
+//         // frame_id++;
+//         // if (frame_id % 20 == 0)
+//         // {
+//         //     cout << "Processing frame " << frame_id << " (" << frame_id * 1000000 / total_ms << " fps)" << endl;
+//         // }
+//         if (img.empty()) break;
+
+//         Mat img0 = img.clone();
+//         Det1.doInfer(img0);
+//         // vector<STrack> output_stracks = tracker.update(detector.getResult()[0]);
+
+//         auto output_det = Det1.result[0];
+//         for (int i = 0; i < output_det.size(); i++)
+// 		{
+//             rectangle(img, output_det[i].rect, Scalar(0,0,255), 2);
+// 		}
+//         // putText(img, format("frame: %d fps: %d num: %d", 1, 1, 1), 
+//         //         Point(0, 30), 0, 0.6, Scalar(0, 0, 255), 2, LINE_AA);
+//         writer.write(img);
+
+//     }
+
+//     cap.release();
+
+//     return 0;
+// }

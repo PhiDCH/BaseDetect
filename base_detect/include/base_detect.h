@@ -1,11 +1,9 @@
 #pragma once
 
-
-// #include <fstream>  
+  
 #include <memory>
-// #include <vector>
 
-// #include <opencv2/opencv.hpp>
+
 #include "NvInfer.h"            // use tensorrt api 
 // #include "cuda_runtime.h"       // use cuda api
 #include "logging.h"            // define trtLogging
@@ -32,7 +30,7 @@ static Logger gLogger;
 
 
 class Detector {
-    private:
+    public:
     int inputC=3, inputH=1, inputW=1, outputSize=1;
     int inputIndex=0, outputIndex=1, maxBatchSize=1;
     int img_w=1280, img_h=720;
@@ -43,12 +41,9 @@ class Detector {
 
     void *buffers[2];
     float *inputHost;
-    
-    // vector<vector<outputType>> res;
 
-    public:
     // initialize model param and load model to GPU
-    Detector(const string modelPath);
+    explicit Detector(const string modelPath);
     // delete model and buffer
     ~Detector();
     
