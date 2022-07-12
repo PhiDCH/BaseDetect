@@ -35,7 +35,7 @@ link_directories(/usr/local/cuda/lib64)
 include_directories(/usr/include/x86_64-linux-gnu/)
 link_directories(/usr/lib/x86_64-linux-gnu/)
 
-# add_library(yolox src/yolox.cpp)
+add_library(yolox src/yolox.cpp)
 
 
 # add_executable(testYoloX src/yolox.cpp src/test.cpp)
@@ -45,6 +45,7 @@ target_link_libraries(testYoloX
   cudart
   nvinfer
   Eigen3::Eigen
+  yolox
 )
 
 

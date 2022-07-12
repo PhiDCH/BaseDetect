@@ -1,4 +1,4 @@
-#include "yolox.cpp"
+#include "yolox.h"
 
 using namespace cv;
 
