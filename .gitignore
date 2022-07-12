@@ -5,6 +5,7 @@
 *.png
 
 .vscode/
+*/.vscode/
 
 *.engine
 *.tar
