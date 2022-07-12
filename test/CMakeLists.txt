@@ -17,7 +17,8 @@ find_package(OpenCV)
 
 find_library(BASE_DETECT libbase_detect.so)
 find_library(YOLOX libyolox.so)
-include_directories(/usr/local/include/yolox)
+find_library(BYTETRACK libbytetrack.so)
+include_directories(/usr/local/include)
 
 
 include_directories(include)
@@ -34,8 +35,8 @@ include_directories(/usr/include/x86_64-linux-gnu/)
 link_directories(/usr/lib/x86_64-linux-gnu/)
 
 
-add_executable(testYolox src/test.cpp)
-target_link_libraries(testYolox
+add_executable(det_yolox src/det_yolox.cpp)
+target_link_libraries(det_yolox
   PUBLIC ${YOLOX}
   PUBLIC ${BASE_DETECT}
   ${OpenCV_LIBRARIES}
@@ -44,6 +45,17 @@ target_link_libraries(testYolox
   # Eigen3::Eigen
 )
 
+
+add_executable(track_bytetrack_yolox src/track_bytetrack_yolox.cpp)
+target_link_libraries(track_bytetrack_yolox
+  PUBLIC ${BASE_DETECT}
+  PUBLIC ${YOLOX}
+  PUBLIC ${BYTETRACK}
+  ${OpenCV_LIBRARIES}
+  cudart
+  nvinfer
+  # Eigen3::Eigen
+)
 
 add_definitions(-O2 -pthread)
 

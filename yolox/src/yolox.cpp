@@ -231,7 +231,7 @@ void Yolox::postprocess(float *outputHost) {
 
     int count = picked.size();
 
-    auto objects = result[0];
+    auto& objects = result[0];
     objects.resize(count);
     for (int i = 0; i < count; i++)
     {
