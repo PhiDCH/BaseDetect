@@ -12,7 +12,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Ofast -Wfatal-errors -D_MWAI
 ## System dependencies are found with CMake's conventions
 find_package(CUDA REQUIRED)
 find_package(OpenCV)
-# find_package(Eigen3 3.4 REQUIRED NO_MODULE)
+find_package(Eigen3 3.4 REQUIRED NO_MODULE)
 
 
 find_library(BASE_DETECT libbase_detect.so)
@@ -54,7 +54,7 @@ target_link_libraries(track_bytetrack_yolox
   ${OpenCV_LIBRARIES}
   cudart
   nvinfer
-  # Eigen3::Eigen
+  Eigen3::Eigen
 )
 
 add_definitions(-O2 -pthread)
