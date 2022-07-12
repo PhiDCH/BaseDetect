@@ -19,8 +19,9 @@ class Yolox : public Detector {
     void postprocess(float* outputHost);
 
     public:
-    Yolox (const string modelPath);
-    // ~Yolox ();
+    float nms_thresh=0.7, bbox_conf_thresh=0.1;
+    Yolox(const string modelPath, float nms_thresh, float bbox_conf_thresh);
+    Yolox(const string modelPath);
     void doInfer(cv::Mat& img);
     vector<vector<OUTPUT_TYPE>> result;
 };

@@ -1,21 +1,9 @@
-
 #include "yolox.h"
 
 
 using namespace cv;
 
 
-/************************* model configuration ****************8*****************/
-#define NMS_THRESH 0.7
-#define BBOX_CONF_THRESH 0.1
-
-// struct YoloxOutput
-// {
-//     cv::Rect_<float> rect;
-//     int label;
-//     float prob;
-// };
-// typedef YoloxOutput OUTPUT_TYPE;
 
 // preprocess function
 Mat static_resize(Mat& img, int inputW, int inputH, float scale) {
@@ -202,24 +190,48 @@ static void generate_yolox_proposals(vector<GridAndStride> grid_strides, float* 
     } // point anchor loop
 }
 
-void decode_outputs(float* prob, vector<YoloxOutput>& objects, float scale, int img_w, int img_h, int inputW, int inputH) {
+
+/************************* define model function here *********************/
+Yolox::Yolox(const string modelPath, float nms_thresh, float bbox_conf_thresh) : Detector(modelPath){
+    result.resize(maxBatchSize);
+    nms_thresh = nms_thresh;
+    bbox_conf_thresh = bbox_conf_thresh;
+}
+
+
+Yolox::Yolox(const string modelPath) : Detector(modelPath){
+    result.resize(maxBatchSize);
+}
+
+
+void Yolox::preprocess(Mat& img) {
+    // resize
+    img_w = img.cols;
+    img_h = img.rows;
+    scale = min(inputW / (img.cols*1.0), inputH / (img.rows*1.0));
+
+    img = static_resize(img, inputW, inputH, scale);
+    // normalize
+    blobFromImage(img, inputHost);
+}
+
+
+void Yolox::postprocess(float *outputHost) {
+
     vector<YoloxOutput> proposals;
     vector<int> strides = {8, 16, 32};
     vector<GridAndStride> grid_strides;
     generate_grids_and_stride(inputW, inputH, strides, grid_strides);
-    generate_yolox_proposals(grid_strides, prob,  BBOX_CONF_THRESH, proposals);
-    //std::cout << "num of boxes before nms: " << proposals.size() << std::endl;
+    generate_yolox_proposals(grid_strides, outputHost,  bbox_conf_thresh, proposals);
 
     qsort_descent_inplace(proposals);
 
     vector<int> picked;
-    nms_sorted_bboxes(proposals, picked, NMS_THRESH);
-
+    nms_sorted_bboxes(proposals, picked, nms_thresh);
 
     int count = picked.size();
 
-    //std::cout << "num of boxes: " << count << std::endl;
-
+    auto objects = result[0];
     objects.resize(count);
     for (int i = 0; i < count; i++)
     {
@@ -242,30 +254,6 @@ void decode_outputs(float* prob, vector<YoloxOutput>& objects, float scale, int 
         objects[i].rect.width = x1 - x0;
         objects[i].rect.height = y1 - y0;
     }
-}
-
-
-
-/************************* define model function here *********************/
-Yolox::Yolox(const string modelPath) : Detector(modelPath){
-    result.resize(maxBatchSize);
-}
-
-
-void Yolox::preprocess(Mat& img) {
-    // resize
-    img_w = img.cols;
-    img_h = img.rows;
-    scale = min(inputW / (img.cols*1.0), inputH / (img.rows*1.0));
-
-    img = static_resize(img, inputW, inputH, scale);
-    // normalize
-    blobFromImage(img, inputHost);
-}
-
-
-void Yolox::postprocess(float *outputHost) {
-    decode_outputs(outputHost, result[0], scale, img_w, img_h, inputW, inputH);
 }
 
 

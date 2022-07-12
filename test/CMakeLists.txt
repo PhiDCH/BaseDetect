@@ -17,7 +17,7 @@ find_package(OpenCV)
 
 find_library(BASE_DETECT libbase_detect.so)
 find_library(YOLOX libyolox.so)
-include_directories(/usr/local/include)
+include_directories(/usr/local/include/yolox)
 
 
 include_directories(include)
