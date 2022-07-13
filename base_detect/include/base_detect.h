@@ -5,7 +5,7 @@
 
 
 #include "NvInfer.h"            // use tensorrt api 
-// #include "cuda_runtime.h"       // use cuda api
+#include "cuda_runtime.h"       // use cuda api
 #include "logging.h"            // define trtLogging
 
 using namespace std;
