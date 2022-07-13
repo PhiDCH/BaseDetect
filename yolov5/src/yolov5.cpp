@@ -70,7 +70,8 @@ class Yolov5 : public Detector {
         size_t size_img = img.cols*img.rows*3;
         memcpy(img_host, img.data, size_img);
         CHECK(cudaMemcpyAsync(img_device, img_host, size_img, cudaMemcpyHostToDevice, stream));
-        preprocess_kernel_img(img_device, img.cols, img.rows, (float*)buffers[inputIndex], inputW, inputH, stream);
+        float *buffer_idx = (float*)buffers[inputIndex];
+        preprocess_kernel_img(img_device, img.cols, img.rows, buffer_idx, inputW, inputH, stream);
     };
 
     void postprocess(float* outputHost) {
@@ -89,14 +90,16 @@ class Yolov5 : public Detector {
         CHECK(cudaMallocHost((void**)&img_host, MAX_IMAGE_INPUT_SIZE_THRESH*3));
         CHECK(cudaMalloc((void**)&img_device, MAX_IMAGE_INPUT_SIZE_THRESH*3));
         result.resize(maxBatchSize);
+        CHECK(cudaStreamCreate(&stream));
     };
 
     Yolov5 (const string modelPath, float nms_thresh, float conf_thresh) : Detector(modelPath) {
         CHECK(cudaMallocHost((void**)&img_host, MAX_IMAGE_INPUT_SIZE_THRESH*3));
         CHECK(cudaMalloc((void**)&img_device, MAX_IMAGE_INPUT_SIZE_THRESH*3));
+        result.resize(maxBatchSize);
+        CHECK(cudaStreamCreate(&stream));
         nms_thresh = nms_thresh;
         conf_thresh = conf_thresh;
-        result.resize(maxBatchSize);
     };
 
     ~Yolov5 () {
