@@ -1,7 +1,7 @@
 #include <fstream> 
 
 #include "base_detect.h"
-#include "cuda_runtime.h"  
+
 
 using namespace std;
 using namespace nvinfer1;

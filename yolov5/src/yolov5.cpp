@@ -6,7 +6,97 @@
 
 using namespace cv;
 
-struct alignas(float) Detection {
+#include <fstream>
+
+using namespace std;
+using namespace nvinfer1;
+// using namespace cv;
+
+
+#define ONE_GBYTE (1024*1024*1024)
+#define ONE_MBYTE (1024*1024)
+void printMemInfo()
+{ 
+    size_t free_byte ;
+    size_t total_byte ;
+    cudaError_t cuda_status = cudaMemGetInfo( &free_byte, &total_byte ) ;
+
+    if ( cudaSuccess != cuda_status ){
+        printf("Error: cudaMemGetInfo fails, %s\n", cudaGetErrorString(cuda_status));
+        exit(1);
+    }
+
+    double free_db = (double)free_byte ;
+    double total_db = (double)total_byte ;
+    double used_db = total_db - free_db ;
+
+    // printf(" GPU memory usage: used = %.2f GB, free = %.2f GB, total = %.2f GB\n", used_db/ONE_GBYTE, free_db/ONE_GBYTE, total_db/ONE_GBYTE);
+    printf(" GPU memory usage: used = %.2f MB, free = %.2f MB, total = %.2f MB\n", used_db/ONE_MBYTE, free_db/ONE_MBYTE, total_db/ONE_MBYTE);
+}
+
+
+/************************* define model function here *********************/
+Detector::Detector (const string modelPath) {
+    ////////// deserialize model
+    char *trtModelStream{nullptr};
+    size_t size{0};
+    ifstream file;
+    file.open(modelPath, ios::binary);
+    if (file.good()) {
+        file.seekg(0, file.end);
+        size = file.tellg();
+        file.seekg(0, file.beg);
+        trtModelStream = new char[size];
+        assert(trtModelStream);
+        file.read(trtModelStream, size);
+        file.close();
+    }
+    unique_ptr<IRuntime> runtime{createInferRuntime(gLogger)};
+    assert(runtime != nullptr);
+    engine.reset(runtime->deserializeCudaEngine(trtModelStream, size));
+    assert(engine != nullptr);
+    context.reset(engine->createExecutionContext());
+    assert(context != nullptr);
+    delete[] trtModelStream;
+
+    ///////////// get model configuration
+    assert(engine->getNbBindings() == 2);
+    // inputIndex = engine->getBindingIndex(INPUT_BLOB_NAME);
+    // outputIndex = engine->getBindingIndex(OUTPUT_BLOB_NAME);
+    // maxBatchSize = engine->getMaxBatchSize();
+
+    // cout << engine->getBindingName(0) << " " << engine->getBindingName(1) << endl;
+
+    Dims dim = engine->getBindingDimensions(inputIndex);
+    maxBatchSize = dim.d[0];
+    inputC = dim.d[1], inputH = dim.d[2], inputW = dim.d[3];
+    // cout << "input shape " << dim.nbDims << " inputC" << inputC << " inputH" << inputH << " inputW" << inputW << endl;
+
+    dim = engine->getBindingDimensions(outputIndex);
+    for (int i=1; i<dim.nbDims; i++) outputSize *= dim.d[i];
+    // cout << "output shape " << dim.nbDims << " " << dim.d[0] << "x" << dim.d[1] << "x" << dim.d[2] << endl;
+    // cout << "outputSize " << outputSize << endl;
+    // cout << "Max Batch Size " << maxBatchSize << endl;
+    inputHost = new float[maxBatchSize*inputH*inputW*inputC];
+    
+    CHECK(cudaMalloc(&buffers[inputIndex], maxBatchSize*inputH*inputW*inputC*sizeof(float)));
+    CHECK(cudaMalloc(&buffers[outputIndex], outputSize*sizeof(float)));
+
+    CHECK(cudaStreamCreate(&stream));
+}
+
+Detector::~Detector () {
+    //////////// free buffer
+    cudaStreamDestroy(stream);
+    CHECK(cudaFree(buffers[inputIndex]));
+    CHECK(cudaFree(buffers[outputIndex]));
+    delete inputHost;
+    // delete outputHost;
+} 
+
+
+
+struct Detection {
     //center_x center_y w h
     float bbox[4];
     float conf;  // bbox_conf * cls_conf
@@ -67,11 +157,13 @@ void nms(vector<Detection>& res, float *output, float conf_thresh, float nms_thr
 
 class Yolov5 : public Detector {
     void preprocess(Mat& img) {
-        size_t size_img = img.cols*img.rows*3;
+        img_w = img.cols;
+        img_h = img.rows;
+        size_t size_img = 3*img_h*img_w;
         memcpy(img_host, img.data, size_img);
         CHECK(cudaMemcpyAsync(img_device, img_host, size_img, cudaMemcpyHostToDevice, stream));
-        float *buffer_idx = (float*)buffers[inputIndex];
-        preprocess_kernel_img(img_device, img.cols, img.rows, buffer_idx, inputW, inputH, stream);
+        cout << img_device << endl;
+        preprocess_kernel_img(img_device, img_w, img_h, (float*)buffers[inputIndex], inputW, inputH, stream);
     };
 
     void postprocess(float* outputHost) {
@@ -90,7 +182,7 @@ class Yolov5 : public Detector {
         CHECK(cudaMallocHost((void**)&img_host, MAX_IMAGE_INPUT_SIZE_THRESH*3));
         CHECK(cudaMalloc((void**)&img_device, MAX_IMAGE_INPUT_SIZE_THRESH*3));
         result.resize(maxBatchSize);
-        CHECK(cudaStreamCreate(&stream));
+        // CHECK(cudaStreamCreate(&stream));
     };
 
     Yolov5 (const string modelPath, float nms_thresh, float conf_thresh) : Detector(modelPath) {
@@ -110,8 +202,11 @@ class Yolov5 : public Detector {
     void doInfer(Mat& img) {
         preprocess(img);
         context->enqueueV2(buffers, stream, nullptr);
-        float outputHost[maxBatchSize*outputSize];
-        CHECK(cudaMemcpyAsync(outputHost, buffers[outputIndex], maxBatchSize*outputSize*sizeof(float), cudaMemcpyDeviceToHost, stream));
+
+        // cout << buffers[0] << " " << buffers[1] << endl;
+        
+        float outputHost[outputSize];
+        CHECK(cudaMemcpyAsync(outputHost, buffers[outputIndex], outputSize*sizeof(float), cudaMemcpyDeviceToHost, stream));
         // cudaStreamSynchronize(stream);
         // postprocess(outputHost);
     };

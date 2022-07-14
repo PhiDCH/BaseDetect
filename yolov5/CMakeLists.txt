@@ -20,6 +20,9 @@ include_directories(/usr/local/include)
 include_directories(include)
 link_directories(include)
 
+include_directories(../base_detect/include)
+link_directories(../base_detect/include)
+
 include_directories(${OpenCV_INCLUDE_DIRS})
 
 
@@ -33,7 +36,7 @@ link_directories(/usr/lib/x86_64-linux-gnu/)
 
 cuda_add_executable(yolov5 src/yolov5.cpp src/preprocess.cu)
 target_link_libraries(yolov5
-  PUBLIC ${BASE_DETECT}
+  # PUBLIC ${BASE_DETECT}
   ${OpenCV_LIBRARIES}
   cudart
   nvinfer
