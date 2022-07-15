@@ -62,4 +62,6 @@ install(
   DESTINATION include
 ) 
 
+if(UNIX)
 add_definitions(-O2 -pthread)
+endif(UNIX)

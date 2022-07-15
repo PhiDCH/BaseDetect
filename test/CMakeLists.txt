@@ -68,6 +68,7 @@ target_link_libraries(track_bytetrack_yolox
   Eigen3::Eigen
 )
 
+if(UNIX)
 add_definitions(-O2 -pthread)
-
+endif(UNIX)
 
