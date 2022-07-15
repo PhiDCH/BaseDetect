@@ -41,6 +41,7 @@ class Detector {
 
     void *buffers[2];
     float *inputHost;
+    float *outputHost;
 
     // initialize model param and load model to GPU
     explicit Detector(const string modelPath);

@@ -3,8 +3,8 @@
 #include "base_detect.h"
 
 
-using namespace std;
-using namespace nvinfer1;
+// using namespace std;
+// using namespace nvinfer1;
 // using namespace cv;
 
 
@@ -70,11 +70,12 @@ Detector::Detector (const string modelPath) {
     // cout << "output shape " << dim.nbDims << " " << dim.d[0] << "x" << dim.d[1] << "x" << dim.d[2] << endl;
     // cout << "outputSize " << outputSize << endl;
     // cout << "Max Batch Size " << maxBatchSize << endl;
-    inputHost = new float[maxBatchSize*inputH*inputW*inputC];
+
     // outputHost = new float[maxBatchSize*outputSize];
     CHECK(cudaMalloc(&buffers[inputIndex], maxBatchSize*inputH*inputW*inputC*sizeof(float)));
     CHECK(cudaMalloc(&buffers[outputIndex], maxBatchSize*outputSize*sizeof(float)));
-
+    inputHost = new float[maxBatchSize*inputH*inputW*inputC];
+    outputHost = new float[maxBatchSize*outputSize];
     // res.resize(maxBatchSize);
 }
 
@@ -83,8 +84,8 @@ Detector::~Detector () {
     cudaStreamDestroy(stream);
     CHECK(cudaFree(this->buffers[this->inputIndex]));
     CHECK(cudaFree(this->buffers[this->outputIndex]));
-    delete inputHost;
-    // delete outputHost;
+    delete[] inputHost;
+    delete[] outputHost;
 } 
 
 

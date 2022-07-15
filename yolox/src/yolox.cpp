@@ -6,7 +6,7 @@ using namespace cv;
 
 
 // preprocess function
-Mat static_resize(Mat& img, int inputW, int inputH, float scale) {
+static Mat static_resize(Mat& img, int inputW, int inputH, float scale) {
     int unpad_w = scale * img.cols;
     int unpad_h = scale * img.rows;
     Mat re(unpad_h, unpad_w, CV_8UC3);
@@ -16,7 +16,7 @@ Mat static_resize(Mat& img, int inputW, int inputH, float scale) {
     return out;
 }
 
-void blobFromImage(Mat& img, float *inputHost){
+static void blobFromImage(Mat& img, float *inputHost){
     cvtColor(img, img, COLOR_BGR2RGB);
 
     int channels = 3;
@@ -216,7 +216,7 @@ void Yolox::preprocess(Mat& img) {
 }
 
 
-void Yolox::postprocess(float *outputHost) {
+void Yolox::postprocess() {
 
     vector<YoloxOutput> proposals;
     vector<int> strides = {8, 16, 32};
@@ -261,9 +261,8 @@ void Yolox::doInfer(Mat& img) {
     preprocess(img);
     CHECK(cudaMemcpyAsync(buffers[inputIndex], inputHost, maxBatchSize*inputC*inputH*inputW*sizeof(float), cudaMemcpyHostToDevice, stream));
     context->enqueueV2(buffers, stream, nullptr);
-    float outputHost[maxBatchSize*outputSize];
     CHECK(cudaMemcpyAsync(outputHost, buffers[outputIndex], maxBatchSize*outputSize*sizeof(float), cudaMemcpyDeviceToHost, stream));
-    postprocess(outputHost);
+    postprocess();
 }
 
 
