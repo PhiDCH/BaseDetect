@@ -49,7 +49,7 @@ add_library(base_detect SHARED src/base_detect.cpp)
 
 install(TARGETS base_detect DESTINATION /usr/lib)
 install(
-  FILES include/base_detect.h include/logging.h
+  FILES include/base_detect.h include/logging.h include/macros.h
   DESTINATION include
 )
 

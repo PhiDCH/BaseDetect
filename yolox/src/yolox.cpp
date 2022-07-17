@@ -196,11 +196,15 @@ Yolox::Yolox(const string modelPath, float nms_thresh, float bbox_conf_thresh) :
     result.resize(maxBatchSize);
     nms_thresh = nms_thresh;
     bbox_conf_thresh = bbox_conf_thresh;
+    inputW = 1088;
+    inputH = 608;
 }
 
 
 Yolox::Yolox(const string modelPath) : Detector(modelPath){
     result.resize(maxBatchSize);
+    inputW = 1088;
+    inputH = 608;
 }
 
 
@@ -259,70 +263,72 @@ void Yolox::postprocess() {
 
 void Yolox::doInfer(Mat& img) {
     preprocess(img);
-    CHECK(cudaMemcpyAsync(buffers[inputIndex], inputHost, maxBatchSize*inputC*inputH*inputW*sizeof(float), cudaMemcpyHostToDevice, stream));
+    CHECK(cudaMemcpyAsync(buffers[inputIndex], inputHost, maxBatchSize*inputSize*sizeof(float), cudaMemcpyHostToDevice, stream));
     context->enqueueV2(buffers, stream, nullptr);
     CHECK(cudaMemcpyAsync(outputHost, buffers[outputIndex], maxBatchSize*outputSize*sizeof(float), cudaMemcpyDeviceToHost, stream));
     postprocess();
 }
 
 
+
+
 // /************************* model configuration ****************8*****************/
-// #define DEVICE 0  // GPU id
-// const string modelPath = "/home/phidch/Downloads/vision-packages/BaseDetect/bytetrack_s.engine";
+#define DEVICE 0  // GPU id
+const string modelPath = "/home/phidch/Downloads/vision-packages/BaseDetect/bytetrack_s.engine";
 
-// int main () {
-//     ///// set device
-//     cudaSetDevice(DEVICE);
+int main () {
+    ///// set device
+    cudaSetDevice(DEVICE);
 
-//     printf("Initial memory:");
-//     printMemInfo();
-//     Yolox Det1(modelPath);
-//     cout << "create engine ";
-//     printMemInfo();
-
-
-
-//     const string input_video_path = "../../palace.mp4";
-
-//     VideoCapture cap(input_video_path);
-//     if (!cap.isOpened()) {
-//         cout << "video is empty" << endl;
-//         return 0;
-//     }
-
-//     int img_w = cap.get(CAP_PROP_FRAME_WIDTH);
-// 	int img_h = cap.get(CAP_PROP_FRAME_HEIGHT);
-//     int fps = cap.get(CAP_PROP_FPS);
-//     // long nFrame = static_cast<long>(cap.get(CAP_PROP_FRAME_COUNT));
-//     Mat img;
-//     VideoWriter writer("../../demo.mp4", VideoWriter::fourcc('m', 'p', '4', 'v'), fps, Size(img_w, img_h));
+    printf("Initial memory:");
+    printMemInfo();
+    Yolox Det1(modelPath);
+    cout << "create engine ";
+    printMemInfo();
 
 
-//     // int frame_id = 0, total_ms = 0;
-//     while (cap.read(img)) {
-//         // frame_id++;
-//         // if (frame_id % 20 == 0)
-//         // {
-//         //     cout << "Processing frame " << frame_id << " (" << frame_id * 1000000 / total_ms << " fps)" << endl;
-//         // }
-//         if (img.empty()) break;
 
-//         Mat img0 = img.clone();
-//         Det1.doInfer(img0);
-//         // vector<STrack> output_stracks = tracker.update(detector.getResult()[0]);
+    const string input_video_path = "../../palace.mp4";
 
-//         auto output_det = Det1.result[0];
-//         for (int i = 0; i < output_det.size(); i++)
-// 		{
-//             rectangle(img, output_det[i].rect, Scalar(0,0,255), 2);
-// 		}
-//         // putText(img, format("frame: %d fps: %d num: %d", 1, 1, 1), 
-//         //         Point(0, 30), 0, 0.6, Scalar(0, 0, 255), 2, LINE_AA);
-//         writer.write(img);
+    VideoCapture cap(input_video_path);
+    if (!cap.isOpened()) {
+        cout << "video is empty" << endl;
+        return 0;
+    }
 
-//     }
+    int img_w = cap.get(CAP_PROP_FRAME_WIDTH);
+	int img_h = cap.get(CAP_PROP_FRAME_HEIGHT);
+    int fps = cap.get(CAP_PROP_FPS);
 
-//     cap.release();
+    Mat img;
+    VideoWriter writer("../../demo.mp4", VideoWriter::fourcc('m', 'p', '4', 'v'), fps, Size(img_w, img_h));
 
-//     return 0;
-// }
+    cout << "hello" << endl;
+
+    // int frame_id = 0, total_ms = 0;
+    while (cap.read(img)) {
+        // frame_id++;
+        // if (frame_id % 20 == 0)
+        // {
+        //     cout << "Processing frame " << frame_id << " (" << frame_id * 1000000 / total_ms << " fps)" << endl;
+        // }
+        if (img.empty()) break;
+
+        Mat img0 = img.clone();
+        Det1.doInfer(img0);
+
+        auto output_det = Det1.result[0];
+        for (int i = 0; i < output_det.size(); i++)
+		{
+            rectangle(img, output_det[i].rect, Scalar(0,0,255), 2);
+		}
+        // putText(img, format("frame: %d fps: %d num: %d", 1, 1, 1), 
+        //         Point(0, 30), 0, 0.6, Scalar(0, 0, 255), 2, LINE_AA);
+        writer.write(img);
+        cout << "hello " << endl;
+    }
+
+    cap.release();
+
+    return 0;
+}

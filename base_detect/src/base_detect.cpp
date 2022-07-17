@@ -59,22 +59,31 @@ Detector::Detector (const string modelPath) {
     assert(engine->getNbBindings() == 2);
     // inputIndex = engine->getBindingIndex(INPUT_BLOB_NAME);
     // outputIndex = engine->getBindingIndex(OUTPUT_BLOB_NAME);
-    // maxBatchSize = engine->getMaxBatchSize();
-    Dims dim = engine->getBindingDimensions(inputIndex);
-    maxBatchSize = dim.d[0];
-    inputC = dim.d[1], inputH = dim.d[2], inputW = dim.d[3];
-    // cout << "input shape " << dim.nbDims << " inputC" << inputC << " inputH" << inputH << " inputW" << inputW << endl;
+    maxBatchSize = engine->getMaxBatchSize();
+    Dims dim;
+
+    dim = engine->getBindingDimensions(inputIndex);
+    cout << "input shape " << dim.nbDims << " ";
+    for (int i=0; i<dim.nbDims; i++) {
+        inputSize *= dim.d[i];
+        cout << dim.d[i] << "x";
+    }
+    cout << " " << "inputSize " << inputSize << endl;
 
     dim = engine->getBindingDimensions(outputIndex);
-    for (int i=1; i<dim.nbDims; i++) outputSize *= dim.d[i];
-    // cout << "output shape " << dim.nbDims << " " << dim.d[0] << "x" << dim.d[1] << "x" << dim.d[2] << endl;
-    // cout << "outputSize " << outputSize << endl;
-    // cout << "Max Batch Size " << maxBatchSize << endl;
+    cout << "output shape " << dim.nbDims << " ";
+    for (int i=0; i<dim.nbDims; i++) {
+        outputSize *= dim.d[i];
+        cout << dim.d[i] << "x";
+    }
+    cout << " " << "outputSize " << outputSize << endl;
 
-    // outputHost = new float[maxBatchSize*outputSize];
-    CHECK(cudaMalloc(&buffers[inputIndex], maxBatchSize*inputH*inputW*inputC*sizeof(float)));
+    cout << "Max Batch Size " << maxBatchSize << endl;
+
+
+    CHECK(cudaMalloc(&buffers[inputIndex], maxBatchSize*inputSize*sizeof(float)));
     CHECK(cudaMalloc(&buffers[outputIndex], maxBatchSize*outputSize*sizeof(float)));
-    inputHost = new float[maxBatchSize*inputH*inputW*inputC];
+    inputHost = new float[maxBatchSize*inputSize];
     outputHost = new float[maxBatchSize*outputSize];
     // res.resize(maxBatchSize);
 }
@@ -82,8 +91,8 @@ Detector::Detector (const string modelPath) {
 Detector::~Detector () {
     //////////// free buffer
     cudaStreamDestroy(stream);
-    CHECK(cudaFree(this->buffers[this->inputIndex]));
-    CHECK(cudaFree(this->buffers[this->outputIndex]));
+    CHECK(cudaFree(buffers[inputIndex]));
+    CHECK(cudaFree(buffers[outputIndex]));
     delete[] inputHost;
     delete[] outputHost;
 } 

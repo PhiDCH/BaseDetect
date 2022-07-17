@@ -4,6 +4,7 @@ project(yolov5)
 ## Compile as C++11, supported in ROS Kinetic and newer
 option(CUDA_USE_STATIC_CUDA_RUNTIME OFF)
 add_compile_options(-std=c++11)
+add_definitions(-DAPI_EXPORTS)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Ofast -Wfatal-errors -D_MWAITXINTRIN_H_INCLUDED -fopenmp")
@@ -13,7 +14,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Ofast -Wfatal-errors -
 
 # cuda
 find_package(CUDA REQUIRED)
-set(CUDA_NVCC_PLAGS ${CUDA_NVCC_PLAGS};-std=c++11;-g;-G;-gencode;arch=compute_30;code=sm_30)
+# set(CUDA_NVCC_PLAGS ${CUDA_NVCC_PLAGS};-std=c++11;-g;-G;-gencode;arch=compute_30;code=sm_30)
 include_directories(/usr/local/cuda/include)
 link_directories(/usr/local/cuda/lib64)
 
@@ -43,10 +44,14 @@ find_library(BASE_DETECT libbase_detect.so)
 include_directories(/usr/local/include)
 
 
+cuda_add_library(myplugins SHARED src/yololayer.cu)
+target_link_libraries(myplugins nvinfer cudart)
+
 
 add_executable(yolov5 src/yolov5.cpp)
 target_link_libraries(yolov5
   PUBLIC ${BASE_DETECT}
+  myplugins
   ${OpenCV_LIBRARIES}
   cudart
   nvinfer

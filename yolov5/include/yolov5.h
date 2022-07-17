@@ -9,12 +9,18 @@ struct alignas(float) Detection {
     float conf;  // bbox_conf * cls_conf
     float class_id;
 };
-typedef Detection Yolov5Output;
+
+struct Yolov5Output {
+    cv::Rect_<float> rect;
+    float prod;
+    int label;
+};
 
 
 class Yolov5 : public Detector {
     void preprocess(cv::Mat& img);
     void postprocess();
+    void get_rect(vector<Detection>& res);
 
     public:
     vector<vector<Yolov5Output>> result;

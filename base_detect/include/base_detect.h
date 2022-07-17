@@ -18,7 +18,7 @@ void printMemInfo();
     do\
     {\
         auto ret = (status);\
-        if (ret != 0)\
+        if (ret != cudaSuccess)\
         {\
             cerr << "Cuda failure: " << ret << endl;\
             abort();\
@@ -31,7 +31,7 @@ static Logger gLogger;
 
 class Detector {
     public:
-    int inputC=3, inputH=1, inputW=1, outputSize=1;
+    int inputC=3, inputH=1, inputW=1, outputSize=1, inputSize=1;
     int inputIndex=0, outputIndex=1, maxBatchSize=1;
     int img_w=1280, img_h=720;
     float scale=1.0;

@@ -1,4 +1,7 @@
+
+
 #include "yolov5.h"
+#include "yololayer.h"
 
 
 using namespace cv;
@@ -58,7 +61,7 @@ bool cmp(const Detection& a, const Detection& b) {
 void nms(vector<Detection>& res, float *output, float conf_thresh, float nms_thresh = 0.5) {
     int det_size = sizeof(Detection) / sizeof(float);
     map<float, vector<Detection>> m;
-    for (int i = 0; i < output[0]; i++) {
+    for (int i = 0; i < output[0] && i < 1000; i++) {
         if (output[1 + det_size * i + 4] <= conf_thresh) continue;
         Detection det;
         memcpy(&det, &output[1 + det_size * i], det_size * sizeof(float));
@@ -94,24 +97,64 @@ void Yolov5::preprocess(Mat& img) {
 }
 
 void Yolov5::postprocess() {
-    nms(result[0], &outputHost[0], conf_thresh, nms_thresh);
+    vector<Detection> pre_res;
+    nms(pre_res, outputHost, conf_thresh, nms_thresh);
+    get_rect(pre_res);
+}
+
+void Yolov5::get_rect(vector<Detection>& pre_res) {
+    auto& res = result[0];
+    res.resize(pre_res.size());
+    for (int i=0; i<pre_res.size(); i++) {
+        res[i].prod = pre_res[i].conf;
+        res[i].label = (int)pre_res[i].class_id;
+
+        auto bbox = pre_res[i].bbox;
+        int l, r, t, b;
+        float r_w = inputW / (img_w * 1.0);
+        float r_h = inputH / (img_h * 1.0);
+        if (r_h > r_w) {
+            l = bbox[0] - bbox[2] / 2.f;
+            r = bbox[0] + bbox[2] / 2.f;
+            t = bbox[1] - bbox[3] / 2.f - (inputH - r_w * img_h) / 2;
+            b = bbox[1] + bbox[3] / 2.f - (inputH - r_w * img_h) / 2;
+            l = l / r_w;
+            r = r / r_w;
+            t = t / r_w;
+            b = b / r_w;
+        } else {
+            l = bbox[0] - bbox[2] / 2.f - (inputW - r_h * img_w) / 2;
+            r = bbox[0] + bbox[2] / 2.f - (inputW - r_h * img_w) / 2;
+            t = bbox[1] - bbox[3] / 2.f;
+            b = bbox[1] + bbox[3] / 2.f;
+            l = l / r_h;
+            r = r / r_h;
+            t = t / r_h;
+            b = b / r_h;
+        }
+        res[i].rect = Rect_<float>(l, t, r - l, b - t);
+    }
 }
 
 Yolov5::Yolov5 (const string modelPath) : Detector(modelPath) {
     result.resize(maxBatchSize);
+    inputW = 640;
+    inputH = 640;
 }
 
 Yolov5::Yolov5 (const string modelPath, float nms_thresh, float conf_thresh) : Detector(modelPath) {
     result.resize(maxBatchSize);
     nms_thresh = nms_thresh;
     conf_thresh = conf_thresh;
+    inputW = 640;
+    inputH = 640;
 }
 
 void Yolov5::doInfer(Mat& img) {
     preprocess(img);
-    CHECK(cudaMemcpyAsync(buffers[inputIndex], inputHost, maxBatchSize*inputC*inputH*inputW*sizeof(float), cudaMemcpyHostToDevice, stream));
-    context->enqueueV2(buffers, stream, nullptr);
-    CHECK(cudaMemcpyAsync(outputHost, buffers[outputIndex], outputSize*sizeof(float), cudaMemcpyDeviceToHost, stream));
+    CHECK(cudaMemcpyAsync(buffers[inputIndex], inputHost, maxBatchSize*inputSize*sizeof(float), cudaMemcpyHostToDevice, stream));
+    context->enqueue(maxBatchSize, buffers, stream, nullptr);
+    CHECK(cudaMemcpyAsync(outputHost, buffers[outputIndex], maxBatchSize*outputSize*sizeof(float), cudaMemcpyDeviceToHost, stream));
     cudaStreamSynchronize(stream);
     postprocess();
 }
@@ -124,17 +167,25 @@ const string modelPath = "../../yolov5s.engine";
 int main () {
     cudaSetDevice(DEVICE);
 
+
     printf("Initial memory:");
     printMemInfo();
-    Yolov5 det1(modelPath);
+    Yolov5 det(modelPath);
     cout << "create engine ";
     printMemInfo();
 
     Mat img = imread("../../zidane.jpg");
+    Mat img1= img.clone();
 
-    det1.doInfer(img);
+    det.doInfer(img1);
 
-    cout << det1.result[0].size() << endl;
+    auto res = det.result[0];
+    cout << res.size() << endl;
+    for (int i=0; i<res.size(); i++) {
+        rectangle(img, res[i].rect, Scalar(0,0,255), 2);
+    }
+    imwrite("../../test.jpg", img);
+
 
     return 0;
 }
