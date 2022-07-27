@@ -32,9 +32,6 @@ else()
   link_directories(/usr/lib/x86_64-linux-gnu/)
 endif()
 
-#local include
-include_directories(include)
-link_directories(include)
 
 
 # add_executable(base_detect src/base_detect.cpp)
@@ -45,11 +42,11 @@ link_directories(include)
 # )
 
 
-add_library(base_detect SHARED src/base_detect.cpp)
+add_library(base_detect SHARED base_detect.cpp)
 
 install(TARGETS base_detect DESTINATION /usr/lib)
 install(
-  FILES include/base_detect.h include/logging.h include/macros.h
+  FILES base_detect.h logging.h macros.h
   DESTINATION include
 )
 

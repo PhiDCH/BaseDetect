@@ -160,32 +160,34 @@ void Yolov5::doInfer(Mat& img) {
 }
 
 
-#define DEVICE 0
-
-const string modelPath = "../../yolov5s.engine";
-
-int main () {
-    cudaSetDevice(DEVICE);
 
 
-    printf("Initial memory:");
-    printMemInfo();
-    Yolov5 det(modelPath);
-    cout << "create engine ";
-    printMemInfo();
+// #define DEVICE 0
 
-    Mat img = imread("../../zidane.jpg");
-    Mat img1= img.clone();
+// const string modelPath = "../../yolov5s.engine";
 
-    det.doInfer(img1);
-
-    auto res = det.result[0];
-    cout << res.size() << endl;
-    for (int i=0; i<res.size(); i++) {
-        rectangle(img, res[i].rect, Scalar(0,0,255), 2);
-    }
-    imwrite("../../test.jpg", img);
+// int main () {
+//     cudaSetDevice(DEVICE);
 
 
-    return 0;
-}
+//     printf("Initial memory:");
+//     printMemInfo();
+//     Yolov5 det(modelPath);
+//     cout << "create engine ";
+//     printMemInfo();
+
+//     Mat img = imread("../../zidane.jpg");
+//     Mat img1= img.clone();
+
+//     det.doInfer(img1);
+
+//     auto res = det.result[0];
+//     cout << res.size() << endl;
+//     for (int i=0; i<res.size(); i++) {
+//         rectangle(img, res[i].rect, Scalar(0,0,255), 2);
+//     }
+//     imwrite("../../test.jpg", img);
+
+
+//     return 0;
+// }

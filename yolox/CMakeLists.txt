@@ -33,9 +33,6 @@ else()
 endif()
 
 
-# local include
-include_directories(include)
-link_directories(include)
 
 # base_detect
 find_library(BASE_DETECT libbase_detect.so)
@@ -53,11 +50,10 @@ include_directories(/usr/local/include)
 # )
 
 
-add_library(yolox SHARED src/yolox.cpp)
-
+add_library(yolox SHARED yolox.cpp)
 install(TARGETS yolox DESTINATION /usr/lib)
 install(
-  FILES include/yolox.h
+  FILES yolox.h
   DESTINATION include
 ) 
 
