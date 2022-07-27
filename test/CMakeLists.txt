@@ -5,46 +5,69 @@ project(testModule)
 option(CUDA_USE_STATIC_CUDA_RUNTIME OFF)
 add_compile_options(-std=c++11)
 set(CMAKE_CXX_STANDARD 11)
-# set(CMAKE_BUILD_TYPE Debug)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Ofast -Wfatal-errors -D_MWAITXINTRIN_H_INCLUDED -fopenmp")
+set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Ofast -Wfatal-errors -D_MWAITXINTRIN_H_INCLUDED -fopenmp")
 
 
 ## System dependencies are found with CMake's conventions
+
+# cuda
 find_package(CUDA REQUIRED)
+include_directories(/usr/local/cuda/include)
+link_directories(/usr/local/cuda/lib64)
+
+# opencv
 find_package(OpenCV)
-# find_package(Eigen3 3.4 REQUIRED NO_MODULE)
+include_directories(${OpenCV_INCLUDE_DIRS})
+
+# eigen3
+find_package(Eigen3 3.4 REQUIRED NO_MODULE)
+
+# tensorrt and cudnn
+if (CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
+  message("embed_platform on")
+  include_directories(/usr/include/aarch64-linux-gnu/)
+  link_directories(/usr/lib/aarch64-linux-gnu/)
+else()
+  message("embed_platform off")
+  include_directories(/usr/include/x86_64-linux-gnu/)
+  link_directories(/usr/lib/x86_64-linux-gnu/)
+endif()
 
 
-find_library(BASE_DETECT libbase_detect.so)
-find_library(YOLOX libyolox.so)
-include_directories(/usr/local/include/yolox)
-
-
+# local include
 include_directories(include)
 link_directories(include)
 
-
-include_directories(${OpenCV_INCLUDE_DIRS})
-
-# cuda
-include_directories(/usr/local/cuda/include)
-link_directories(/usr/local/cuda/lib64)
-# tensorrt and cudnn
-include_directories(/usr/include/x86_64-linux-gnu/)
-link_directories(/usr/lib/x86_64-linux-gnu/)
+# local lib
+find_library(BASE_DETECT libbase_detect.so)
+find_library(YOLOX libyolox.so)
+find_library(BYTETRACK libbytetrack.so)
+include_directories(/usr/local/include)
 
 
-add_executable(testYolox src/test.cpp)
-target_link_libraries(testYolox
+add_executable(det_yolox src/det_yolox.cpp)
+target_link_libraries(det_yolox
   PUBLIC ${YOLOX}
   PUBLIC ${BASE_DETECT}
   ${OpenCV_LIBRARIES}
   cudart
   nvinfer
-  # Eigen3::Eigen
 )
 
 
-add_definitions(-O2 -pthread)
+add_executable(track_bytetrack_yolox src/track_bytetrack_yolox.cpp)
+target_link_libraries(track_bytetrack_yolox
+  PUBLIC ${BASE_DETECT}
+  PUBLIC ${YOLOX}
+  PUBLIC ${BYTETRACK}
+  ${OpenCV_LIBRARIES}
+  cudart
+  nvinfer
+  Eigen3::Eigen
+)
 
+if(UNIX)
+add_definitions(-O2 -pthread)
+endif(UNIX)
 
