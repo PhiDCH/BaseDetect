@@ -35,18 +35,25 @@ else()
 endif()
 
 
-# local include
-include_directories(include)
-link_directories(include)
 
 # local lib
 find_library(BASE_DETECT libbase_detect.so)
 find_library(YOLOX libyolox.so)
 find_library(BYTETRACK libbytetrack.so)
+find_library(YOLOV5 libyolov5.so)
 include_directories(/usr/local/include)
 
 
-add_executable(det_yolox src/det_yolox.cpp)
+add_executable(test_base test_base.cpp)
+target_link_libraries(test_base
+  PUBLIC ${BASE_DETECT}
+  ${OpenCV_LIBRARIES}
+  cudart
+  nvinfer
+)
+
+
+add_executable(det_yolox det_yolox.cpp)
 target_link_libraries(det_yolox
   PUBLIC ${YOLOX}
   PUBLIC ${BASE_DETECT}
@@ -56,7 +63,7 @@ target_link_libraries(det_yolox
 )
 
 
-add_executable(track_bytetrack_yolox src/track_bytetrack_yolox.cpp)
+add_executable(track_bytetrack_yolox track_bytetrack_yolox.cpp)
 target_link_libraries(track_bytetrack_yolox
   PUBLIC ${BASE_DETECT}
   PUBLIC ${YOLOX}
@@ -66,6 +73,9 @@ target_link_libraries(track_bytetrack_yolox
   nvinfer
   Eigen3::Eigen
 )
+
+
+
 
 if(UNIX)
 add_definitions(-O2 -pthread)
