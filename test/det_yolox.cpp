@@ -4,7 +4,7 @@ using namespace cv;
 
 /************************* model configuration ****************8*****************/
 #define DEVICE 0  // GPU id
-const string modelPath = "../../bytetrack_s.engine";
+const string modelPath = "../../yoloXs.engine";
 const string input_video_path = "../../palace.mp4";
 const string output_video_path = "../../demo.mp4";
 
