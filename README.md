@@ -3,10 +3,13 @@ This repo provide code for newly AI model serving written in Tensorrt APIs (C++)
 
 [Yolov5](https://github.com/ultralytics/yolov5) [Yolov6](https://github.com/meituan/YOLOv6) [Yolov7](https://github.com/jinfagang/yolov7) [YoloX](https://github.com/Megvii-BaseDetection/YOLOX)
 
+![image info](./base_detect/design.jpg)
+
 ## Dependencies 
 + tensorrt
 + opencv
 + eigen
+
 
 
 ## First, build base_detect:
