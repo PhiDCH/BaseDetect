@@ -4,67 +4,85 @@ using namespace cv;
 
 /************************* model configuration ****************8*****************/
 #define DEVICE 0  // GPU id
-const string modelPath = "../../yoloXs.engine";
-const string input_video_path = "../../palace.mp4";
-const string output_video_path = "../../demo.mp4";
 
-int main () {
+
+int main (int argc, char** argv) {
+    // model config
+    const string model_path = "../../bytetrack_s.engine";
+    int inputw = 1088;
+    int inputh = 608;
+    float nms_thresh = 0.7;
+    float bbox_conf_thresh = 0.1;
+
+    // load model
     cudaSetDevice(DEVICE);
-
-
     printf("Initial memory:");
     printMemInfo();
-    Yolox detector(modelPath);
+    Yolox detector(model_path, inputw, inputh, nms_thresh, bbox_conf_thresh);
     cout << "create engine ";
     printMemInfo();
 
+    Mat img, img0;
 
-    // Mat img = imread("/home/cros/catkin_ws/src/1.jpg");
-    // if (img.empty()) cout << "read img fail" << endl;
-    // detector.DoInfer(img);    
+    // get input image (video)
+    const string input_path = string(argv[1]);
+    const string output_path = string(argv[2]);
+    string f_ = input_path.substr(input_path.find_last_of(".") + 1);
 
-
-    VideoCapture cap(input_video_path);
-    if (!cap.isOpened()) {
-        cout << "video is empty" << endl;
-        return 0;
-    }
-
-    int img_w = cap.get(CAP_PROP_FRAME_WIDTH);
-	int img_h = cap.get(CAP_PROP_FRAME_HEIGHT);
-    int fps = cap.get(CAP_PROP_FPS);
-    Mat img;
-    VideoWriter writer(output_video_path, VideoWriter::fourcc('m', 'p', '4', 'v'), fps, Size(img_w, img_h));
-
-
-    int frame_id = 0, total_ms = 0;
-    while (cap.read(img)) {
-        frame_id++;
-        if (frame_id % 50 == 0)
-        {
-            cout << "Processing frame " << frame_id << " (" << frame_id * 1000000 / total_ms << " fps)" << endl;
-        }
-        if (img.empty()) break;
-
-        auto start = chrono::system_clock::now();
-
-        Mat img0 = img.clone();
-        detector.doInfer(img0);
-        
-        auto end = chrono::system_clock::now();
-        total_ms += chrono::duration_cast<chrono::microseconds>(end-start).count();
-
+    if (f_ == "jpg" || f_ == "png" || f_ == "jpeg") {
+        img = imread(input_path);
+        img0 = img.clone();
+        if (img.empty()) cout << "read img fail" << endl;
+        detector.doInfer(img0);    
         auto res = detector.result[0];
         for (int i = 0; i < res.size(); i++)
-		{
             rectangle(img, res[i].rect, Scalar(0,0,255), 2);
-		}
-        putText(img, format("frame: %d fps: %d num: %d", frame_id, frame_id * 1000000 / total_ms, res.size()), Point(0, 30), 0, 0.6, Scalar(0, 0, 255), 2, LINE_AA);
-        writer.write(img);
 
+        imwrite(output_path, img);
     }
 
-    cap.release();
-    cout << "FPS: " << frame_id * 1000000 / total_ms << endl;
+    else if (f_ == "mp4" || f_ == "avi") {
+        VideoCapture cap(input_path);
+        if (!cap.isOpened()) {
+            cout << "video is empty" << endl;
+            return 0;
+        }
+
+        int img_w = cap.get(CAP_PROP_FRAME_WIDTH);
+        int img_h = cap.get(CAP_PROP_FRAME_HEIGHT);
+        int fps = cap.get(CAP_PROP_FPS);
+        VideoWriter writer(output_path, VideoWriter::fourcc('m', 'p', '4', 'v'), fps, Size(img_w, img_h));
+
+
+        int frame_id = 0, total_ms = 0;
+        while (cap.read(img)) {
+            frame_id++;
+            if (frame_id % 50 == 0)
+            {
+                cout << "Processing frame " << frame_id << " (" << frame_id * 1000000 / total_ms << " fps)" << endl;
+            }
+            if (img.empty()) break;
+
+            auto start = chrono::system_clock::now();
+
+            img0 = img.clone();
+            detector.doInfer(img0);
+            
+            auto end = chrono::system_clock::now();
+            total_ms += chrono::duration_cast<chrono::microseconds>(end-start).count();
+
+            auto res = detector.result[0];
+            for (int i = 0; i < res.size(); i++)
+            {
+                rectangle(img, res[i].rect, Scalar(0,0,255), 2);
+            }
+            putText(img, format("frame: %d fps: %d num: %d", frame_id, frame_id * 1000000 / total_ms, res.size()), Point(0, 30), 0, 0.6, Scalar(0, 0, 255), 2, LINE_AA);
+            writer.write(img);
+
+        }
+
+        cap.release();
+        cout << "FPS: " << frame_id * 1000000 / total_ms << endl;
+    }
     return 0;
 }

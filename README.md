@@ -8,9 +8,8 @@ This repo provide code for newly AI model serving written in Tensorrt APIs (C++)
 + opencv
 + eigen
 
-## Usage
 
-First, build base_detect:
+## First, build base_detect:
 
 ```
 cd base_detect/build && cmake .. && sudo make install && cd ../..
@@ -23,19 +22,25 @@ and build tracking algorithm, ex bytetrack:
 ```
 cd bytetrack/build && cmake .. && sudo make install && cd ../..
 ```
-
-Or simply run setup bash file 
+and build test code
+```
+cd test/build && cmake .. && make 
+```
+## Or simply run setup bash file 
 ```
 bash setup.bash
 ```
 
-Finally, test model
-```
-cd base_detect/build && cmake .. && make
-./det_yolox
-./track_bytetrack_yolox
-```
-
-
 ## Download assets and checkpoints [here](https://drive.google.com/drive/folders/1XQ9Of7hJ32aYhHaY-k-g2B-mJVwb1xYb?usp=sharing) (tensorrt 8.4) 
+
+## Finally, test model
+```
+cd test/build 
+./det_yolox ../../zidane.jpg ../../test.jpg
+
+./det_yolox ../../palace.mp4 ../../test.mp4
+
+./track_bytetrack_yolox ../../palace.mp4 ../../test.mp4
+```
+
 

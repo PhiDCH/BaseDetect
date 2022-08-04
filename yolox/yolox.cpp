@@ -192,19 +192,12 @@ static void generate_yolox_proposals(vector<GridAndStride> grid_strides, float* 
 
 
 /************************* define model function here *********************/
-Yolox::Yolox(const string modelPath, float nms_thresh, float bbox_conf_thresh) : Detector(modelPath){
+Yolox::Yolox(const string modelPath, int inputw, int inputh, float nms_thresh_, float bbox_conf_thresh_) : Detector(modelPath){
     result.resize(maxBatchSize);
-    nms_thresh = nms_thresh;
-    bbox_conf_thresh = bbox_conf_thresh;
-    inputW = 1088;
-    inputH = 608;
-}
-
-
-Yolox::Yolox(const string modelPath) : Detector(modelPath){
-    result.resize(maxBatchSize);
-    inputW = 1088;
-    inputH = 608;
+    nms_thresh = nms_thresh_;
+    bbox_conf_thresh = bbox_conf_thresh_;
+    inputW = inputw;
+    inputH = inputh;
 }
 
 
@@ -273,62 +266,77 @@ void Yolox::doInfer(Mat& img) {
 
 
 // /************************* model configuration ****************8*****************/
-#define DEVICE 0  // GPU id
-const string modelPath = "/home/phidch/Downloads/vision-packages/BaseDetect/bytetrack_s.engine";
-
-int main () {
-    ///// set device
-    cudaSetDevice(DEVICE);
-
-    printf("Initial memory:");
-    printMemInfo();
-    Yolox Det1(modelPath);
-    cout << "create engine ";
-    printMemInfo();
+// #define DEVICE 0  // GPU id
 
 
+// int main (int agrc, char** argv) {
+//     const string model_path = "/home/phidch/Downloads/vision-packages/BaseDetect/bytetrack_s.engine";
+//     string input_path = "../../zidane.jpg";
+//     string output_path = "../../test.jpg";
 
-    const string input_video_path = "../../palace.mp4";
+//     ///// set device
+//     cudaSetDevice(DEVICE);
 
-    VideoCapture cap(input_video_path);
-    if (!cap.isOpened()) {
-        cout << "video is empty" << endl;
-        return 0;
-    }
+//     printf("Initial memory:");
+//     printMemInfo();
+//     Yolox Det1(model_path, 1088, 608, 0.7, 0.1);
+//     cout << "create engine ";
+//     printMemInfo();
 
-    int img_w = cap.get(CAP_PROP_FRAME_WIDTH);
-	int img_h = cap.get(CAP_PROP_FRAME_HEIGHT);
-    int fps = cap.get(CAP_PROP_FPS);
+//     Mat img, img0;
 
-    Mat img;
-    VideoWriter writer("../../demo.mp4", VideoWriter::fourcc('m', 'p', '4', 'v'), fps, Size(img_w, img_h));
+//     img = imread(input_path);
+//     img0 = img.clone();
+//     Det1.doInfer(img0);
+//     auto res = Det1.result[0];
+//     for (int i = 0; i < res.size(); i++)
+//         rectangle(img, res[i].rect, Scalar(0,0,255), 2);
 
-    cout << "hello" << endl;
+//     imwrite(output_path, img);
 
-    // int frame_id = 0, total_ms = 0;
-    while (cap.read(img)) {
-        // frame_id++;
-        // if (frame_id % 20 == 0)
-        // {
-        //     cout << "Processing frame " << frame_id << " (" << frame_id * 1000000 / total_ms << " fps)" << endl;
-        // }
-        if (img.empty()) break;
 
-        Mat img0 = img.clone();
-        Det1.doInfer(img0);
+//     // const string input_video_path = "../../palace.mp4";
 
-        auto output_det = Det1.result[0];
-        for (int i = 0; i < output_det.size(); i++)
-		{
-            rectangle(img, output_det[i].rect, Scalar(0,0,255), 2);
-		}
-        // putText(img, format("frame: %d fps: %d num: %d", 1, 1, 1), 
-        //         Point(0, 30), 0, 0.6, Scalar(0, 0, 255), 2, LINE_AA);
-        writer.write(img);
-        cout << "hello " << endl;
-    }
+//     // VideoCapture cap(input_video_path);
+//     // if (!cap.isOpened()) {
+//     //     cout << "video is empty" << endl;
+//     //     return 0;
+//     // }
 
-    cap.release();
+//     // int img_w = cap.get(CAP_PROP_FRAME_WIDTH);
+// 	// int img_h = cap.get(CAP_PROP_FRAME_HEIGHT);
+//     // int fps = cap.get(CAP_PROP_FPS);
 
-    return 0;
-}
+//     // VideoWriter writer("../../demo.mp4", VideoWriter::fourcc('m', 'p', '4', 'v'), fps, Size(img_w, img_h));
+
+//     // int frame_id = 0, total_ms = 0;
+//     // while (cap.read(img)) {
+//     //     frame_id++;
+//     //     if (frame_id % 50 == 0)
+//     //     {
+//     //         cout << "Processing frame " << frame_id << " (" << frame_id * 1000000 / total_ms << " fps)" << endl;
+//     //     }
+//     //     if (img.empty()) break;
+
+//     //     auto start = chrono::system_clock::now();
+
+//     //     img0 = img.clone();
+//     //     Det1.doInfer(img0);
+
+//     //     auto end = chrono::system_clock::now();
+//     //     total_ms += chrono::duration_cast<chrono::microseconds>(end-start).count();
+
+//     //     auto output_det = Det1.result[0];
+//     //     for (int i = 0; i < output_det.size(); i++)
+// 	// 	{
+//     //         rectangle(img, output_det[i].rect, Scalar(0,0,255), 2);
+// 	// 	}
+//     //     // putText(img, format("frame: %d fps: %d num: %d", 1, 1, 1), 
+//     //     //         Point(0, 30), 0, 0.6, Scalar(0, 0, 255), 2, LINE_AA);
+//     //     writer.write(img);
+//     // }
+
+//     // cap.release();
+
+//     return 0;
+// }

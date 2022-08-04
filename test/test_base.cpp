@@ -5,16 +5,16 @@ using namespace std;
 
 /************************* model configuration ****************8*****************/
 #define DEVICE 0  // GPU id
-const string modelPath = "/home/phidch/Downloads/vision-packages/BaseDetect/yolov6s.engine";
 
-int main () {
-    ///// set device
+int main (int argc, char** argv) {
+    string model_path = string(argv[1]);
+
     cudaSetDevice(DEVICE);
 
     if (1) {
         printf("Initial memory:");
         printMemInfo();
-        Detector Det1(modelPath);
+        Detector Det1(model_path);
         cout << "create engine ";
         printMemInfo();
     }

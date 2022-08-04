@@ -18,27 +18,28 @@ vector<Object> convert_yoloxOutput_2_bytetrackInput(vector<YoloxOutput>& res) {
 
 /************************* model configuration ****************8*****************/
 #define DEVICE 0  // GPU id
-const string modelPath = "../../bytetrack_s.engine";
-const string input_video_path = "../../palace.mp4";
-const string output_video_path = "../../demo.mp4";
 
-int main () {
+int main (int argc, char** argv) {
+    // model config
+    const string model_path = "../../bytetrack_s.engine";
+    int inputw = 1088;
+    int inputh = 608;
+    float nms_thresh = 0.7;
+    float bbox_conf_thresh = 0.1;
+
+    // load model
     cudaSetDevice(DEVICE);
-
-
     printf("Initial memory:");
     printMemInfo();
-    Yolox detector(modelPath);
+    Yolox detector(model_path, inputw, inputh, nms_thresh, bbox_conf_thresh);
     cout << "create engine ";
     printMemInfo();
+  
+    // get input image (video)
+    const string input_path = string(argv[1]);
+    const string output_path = string(argv[2]);
 
-
-    // Mat img = imread("/home/cros/catkin_ws/src/1.jpg");
-    // if (img.empty()) cout << "read img fail" << endl;
-    // detector.DoInfer(img);    
-
-
-    VideoCapture cap(input_video_path);
+    VideoCapture cap(input_path);
     if (!cap.isOpened()) {
         cout << "video is empty" << endl;
         return 0;
@@ -49,7 +50,7 @@ int main () {
     int fps = cap.get(CAP_PROP_FPS);
 
     Mat img;
-    VideoWriter writer(output_video_path, VideoWriter::fourcc('m', 'p', '4', 'v'), fps, Size(img_w, img_h));
+    VideoWriter writer(output_path, VideoWriter::fourcc('m', 'p', '4', 'v'), fps, Size(img_w, img_h));
 
     BYTETracker tracker(fps, 30);
     int frame_id = 0, total_ms = 0;
