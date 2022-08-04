@@ -40,7 +40,7 @@ include_directories(/usr/local/include)
 
 
 
-# add_executable(yolox src/yolox.cpp)
+# add_executable(yolox yolox.cpp)
 # target_link_libraries(yolox
 #   PUBLIC ${BASE_DETECT}
 #   ${OpenCV_LIBRARIES}

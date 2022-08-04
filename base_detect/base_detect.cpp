@@ -66,7 +66,8 @@ Detector::Detector (const string modelPath) {
     cout << "input shape " << dim.nbDims << " ";
     for (int i=0; i<dim.nbDims; i++) {
         inputSize *= dim.d[i];
-        cout << dim.d[i] << "x";
+        if (i==dim.nbDims-1) cout << dim.d[i];
+        else cout << dim.d[i] << "x";
     }
     cout << " " << "inputSize " << inputSize << endl;
 
@@ -74,7 +75,8 @@ Detector::Detector (const string modelPath) {
     cout << "output shape " << dim.nbDims << " ";
     for (int i=0; i<dim.nbDims; i++) {
         outputSize *= dim.d[i];
-        cout << dim.d[i] << "x";
+        if (i==dim.nbDims-1) cout << dim.d[i];
+        else cout << dim.d[i] << "x";
     }
     cout << " " << "outputSize " << outputSize << endl;
 
@@ -85,7 +87,7 @@ Detector::Detector (const string modelPath) {
     CHECK(cudaMalloc(&buffers[outputIndex], maxBatchSize*outputSize*sizeof(float)));
     inputHost = new float[maxBatchSize*inputSize];
     outputHost = new float[maxBatchSize*outputSize];
-    // res.resize(maxBatchSize);
+    
 }
 
 Detector::~Detector () {
