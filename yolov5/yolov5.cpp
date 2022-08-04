@@ -136,24 +136,18 @@ void Yolov5::get_rect(vector<Detection>& pre_res) {
     }
 }
 
-Yolov5::Yolov5 (const string modelPath) : Detector(modelPath) {
+Yolov5::Yolov5 (const string modelPath, int inputw, int inputh, float nms_thresh_, float conf_thresh_) : Detector(modelPath) {
     result.resize(maxBatchSize);
-    inputW = 640;
-    inputH = 640;
-}
-
-Yolov5::Yolov5 (const string modelPath, float nms_thresh, float conf_thresh) : Detector(modelPath) {
-    result.resize(maxBatchSize);
-    nms_thresh = nms_thresh;
-    conf_thresh = conf_thresh;
-    inputW = 640;
-    inputH = 640;
+    nms_thresh = nms_thresh_;
+    conf_thresh = conf_thresh_;
+    inputW = inputw;
+    inputH = inputh;
 }
 
 void Yolov5::doInfer(Mat& img) {
     preprocess(img);
     CHECK(cudaMemcpyAsync(buffers[inputIndex], inputHost, maxBatchSize*inputSize*sizeof(float), cudaMemcpyHostToDevice, stream));
-    context->enqueue(maxBatchSize, buffers, stream, nullptr);
+    context->enqueueV2(buffers, stream, nullptr);
     CHECK(cudaMemcpyAsync(outputHost, buffers[outputIndex], maxBatchSize*outputSize*sizeof(float), cudaMemcpyDeviceToHost, stream));
     cudaStreamSynchronize(stream);
     postprocess();
@@ -162,32 +156,36 @@ void Yolov5::doInfer(Mat& img) {
 
 
 
-// #define DEVICE 0
+#define DEVICE 0
 
-// const string modelPath = "../../yolov5s.engine";
+const string modelPath = "../../yolov5s.engine";
+int inputw = 640;
+int inputh = 640;
+float nms_thresh = 0.4;
+float conf_thresh = 0.5;
 
-// int main () {
-//     cudaSetDevice(DEVICE);
-
-
-//     printf("Initial memory:");
-//     printMemInfo();
-//     Yolov5 det(modelPath);
-//     cout << "create engine ";
-//     printMemInfo();
-
-//     Mat img = imread("../../zidane.jpg");
-//     Mat img1= img.clone();
-
-//     det.doInfer(img1);
-
-//     auto res = det.result[0];
-//     cout << res.size() << endl;
-//     for (int i=0; i<res.size(); i++) {
-//         rectangle(img, res[i].rect, Scalar(0,0,255), 2);
-//     }
-//     imwrite("../../test.jpg", img);
+int main () {
+    cudaSetDevice(DEVICE);
 
 
-//     return 0;
-// }
+    printf("Initial memory:");
+    printMemInfo();
+    Yolov5 det(modelPath, inputw, inputh, nms_thresh, conf_thresh);
+    cout << "create engine ";
+    printMemInfo();
+
+    Mat img = imread("../../zidane.jpg");
+    Mat img0= img.clone();
+
+    det.doInfer(img0);
+
+    auto res = det.result[0];
+    cout << res.size() << endl;
+    for (int i=0; i<res.size(); i++) {
+        rectangle(img, res[i].rect, Scalar(0,0,255), 2);
+    }
+    imwrite("../../test.jpg", img);
+
+
+    return 0;
+}

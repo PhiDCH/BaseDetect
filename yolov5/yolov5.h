@@ -24,9 +24,8 @@ class Yolov5 : public Detector {
 
     public:
     vector<vector<Yolov5Output>> result;
-    float nms_thresh=0.4, conf_thresh=0.5;
-    Yolov5 (const string modelPath);
-    Yolov5 (const string modelPath, float nms_thresh, float conf_thresh);
+    float nms_thresh, conf_thresh;
+    Yolov5 (const string modelPath, int inputw, int inputh, float nms_thresh_=0.4, float conf_thresh_=0.5);
 
     void doInfer(cv::Mat& img);
 };
