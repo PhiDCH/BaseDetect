@@ -41,7 +41,10 @@ find_library(BASE_DETECT libbase_detect.so)
 find_library(YOLOX libyolox.so)
 find_library(BYTETRACK libbytetrack.so)
 find_library(YOLOV5 libyolov5.so)
+find_library(YOLOV6 libyolov6.so)
 include_directories(/usr/local/include)
+
+
 
 
 add_executable(test_base test_base.cpp)
@@ -75,7 +78,45 @@ target_link_libraries(track_bytetrack_yolox
 )
 
 
+add_executable(det_yolov5 det_yolov5.cpp)
+target_link_libraries(det_yolov5
+  PUBLIC ${YOLOV5}
+  PUBLIC ${BASE_DETECT}
+  ${OpenCV_LIBRARIES}
+  cudart
+  nvinfer
+)
 
+add_executable(track_bytetrack_yolov5 track_bytetrack_yolov5.cpp)
+target_link_libraries(track_bytetrack_yolov5
+  PUBLIC ${BASE_DETECT}
+  PUBLIC ${YOLOV5}
+  PUBLIC ${BYTETRACK}
+  ${OpenCV_LIBRARIES}
+  cudart
+  nvinfer
+  Eigen3::Eigen
+)
+
+add_executable(det_yolov6 det_yolov6.cpp)
+target_link_libraries(det_yolov6
+  PUBLIC ${YOLOV6}
+  PUBLIC ${BASE_DETECT}
+  ${OpenCV_LIBRARIES}
+  cudart
+  nvinfer
+)
+
+add_executable(track_bytetrack_yolov6 track_bytetrack_yolov6.cpp)
+target_link_libraries(track_bytetrack_yolov6
+  PUBLIC ${BASE_DETECT}
+  PUBLIC ${YOLOV6}
+  PUBLIC ${BYTETRACK}
+  ${OpenCV_LIBRARIES}
+  cudart
+  nvinfer
+  Eigen3::Eigen
+)
 
 if(UNIX)
 add_definitions(-O2 -pthread)
