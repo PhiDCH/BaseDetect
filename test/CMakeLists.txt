@@ -47,8 +47,8 @@ include_directories(/usr/local/include)
 
 
 
-add_executable(test_base test_base.cpp)
-target_link_libraries(test_base
+add_executable(new_model new_model.cpp)
+target_link_libraries(new_model
   PUBLIC ${BASE_DETECT}
   ${OpenCV_LIBRARIES}
   cudart

@@ -4,7 +4,7 @@
 
 using namespace cv;
 
-/************************* model configuration ****************8*****************/
+/************************* model configuration *********************************/
 #define DEVICE 0
 // model config
 const string model_path = "../../yolov5s.engine";
