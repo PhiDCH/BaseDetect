@@ -7,6 +7,9 @@ cd yolox/build && cmake .. && make && sudo make install && cd ../..
 mkdir yolov5/build 
 cd yolov5/build && cmake .. && make && sudo make install && cd ../..
 
+mkdir yolov6/build 
+cd yolov6/build && cmake .. && make && sudo make install && cd ../..
+
 mkdir bytetrack/build 
 cd bytetrack/build && cmake .. && make && sudo make install && cd ../..
 
