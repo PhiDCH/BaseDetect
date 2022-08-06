@@ -40,18 +40,18 @@ find_library(BASE_DETECT libbase_detect.so)
 include_directories(/usr/local/include)
 
 
-# cuda_add_library(yolov5 SHARED yolov5.cpp yololayer.cu)
-# install(TARGETS yolov5 DESTINATION /usr/lib)
-# install(FILES yolov5.h DESTINATION include)
+cuda_add_library(yolov5 SHARED yolov5.cpp yololayer.cu)
+install(TARGETS yolov5 DESTINATION /usr/lib)
+install(FILES yolov5.h DESTINATION include)
 
 
-cuda_add_executable(yolov5 yolov5.cpp yololayer.cu)
-target_link_libraries(yolov5
-  PUBLIC ${BASE_DETECT}
-  ${OpenCV_LIBRARIES}
-  cudart
-  nvinfer
-)
+# cuda_add_executable(yolov5 yolov5.cpp yololayer.cu)
+# target_link_libraries(yolov5
+#   PUBLIC ${BASE_DETECT}
+#   ${OpenCV_LIBRARIES}
+#   cudart
+#   nvinfer
+# )
 
 
 if(UNIX)
