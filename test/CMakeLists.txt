@@ -21,7 +21,7 @@ find_package(OpenCV)
 include_directories(${OpenCV_INCLUDE_DIRS})
 
 # eigen3
-find_package(Eigen3 3.4 REQUIRED NO_MODULE)
+find_package(Eigen3 REQUIRED NO_MODULE)
 
 # tensorrt and cudnn
 if (CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
