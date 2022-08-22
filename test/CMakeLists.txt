@@ -118,6 +118,27 @@ target_link_libraries(track_bytetrack_yolov6
   Eigen3::Eigen
 )
 
+add_executable(det_yolov7 det_yolov7.cpp)
+target_link_libraries(det_yolov7
+  PUBLIC ${YOLOV6}
+  PUBLIC ${BASE_DETECT}
+  ${OpenCV_LIBRARIES}
+  cudart
+  nvinfer
+)
+
+add_executable(track_bytetrack_yolov7 track_bytetrack_yolov7.cpp)
+target_link_libraries(track_bytetrack_yolov7
+  PUBLIC ${BASE_DETECT}
+  PUBLIC ${YOLOV6}
+  PUBLIC ${BYTETRACK}
+  ${OpenCV_LIBRARIES}
+  cudart
+  nvinfer
+  Eigen3::Eigen
+)
+
+
 if(UNIX)
 add_definitions(-O2 -pthread)
 endif(UNIX)

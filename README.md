@@ -70,4 +70,8 @@ cd /usr/src/tensorrt/bin
 ```
 In case of yolov5, you should convert from .pt file using the repo [tensorrtx](https://github.com/wang-xinyu/tensorrtx/tree/master/yolov5) to get the right form.
 
+With yolov7.pt -> yolov7.onnx, convert without nms (remove flag --end2end), identical to [Yolov6](https://github.com/meituan/YOLOv6). From [Yolov7](https://github.com/WongKinYiu/yolov7).
+```
+python export.py --weights yolov7.pt --grid --simplify --topk-all 100 --img-size 640 640 --max-wh 640
+```
 
