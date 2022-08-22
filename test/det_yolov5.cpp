@@ -1,25 +1,24 @@
-#include "yolov5.h"
-
-
+#include "yolov6.h"
 
 using namespace cv;
 
-/************************* model configuration *********************************/
-#define DEVICE 0
-// model config
-const string model_path = "../../yolov5s.engine";
-int inputw = 640;
-int inputh = 640;
-float nms_thresh = 0.4;
-float conf_thresh = 0.5;
+/************************* model configuration ****************8*****************/
+#define DEVICE 0  // GPU id
 
 
 int main (int argc, char** argv) {
+    // model config
+    const string model_path = "../../yolov5s.engine";
+    int inputw = 640;
+    int inputh = 640;
+    float nms_thresh = 0.4;
+    float bbox_conf_thresh = 0.5;
+
     // load model
     cudaSetDevice(DEVICE);
     printf("Initial memory:");
     printMemInfo();
-    Yolov5 detector(model_path, inputw, inputh, nms_thresh, conf_thresh);
+    Yolov6 detector(model_path, inputw, inputh, nms_thresh, bbox_conf_thresh);
     cout << "create engine ";
     printMemInfo();
 

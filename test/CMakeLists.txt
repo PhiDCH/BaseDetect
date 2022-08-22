@@ -40,7 +40,6 @@ endif()
 find_library(BASE_DETECT libbase_detect.so)
 find_library(YOLOX libyolox.so)
 find_library(BYTETRACK libbytetrack.so)
-find_library(YOLOV5 libyolov5.so)
 find_library(YOLOV6 libyolov6.so)
 include_directories(/usr/local/include)
 
@@ -80,7 +79,7 @@ target_link_libraries(track_bytetrack_yolox
 
 add_executable(det_yolov5 det_yolov5.cpp)
 target_link_libraries(det_yolov5
-  PUBLIC ${YOLOV5}
+  PUBLIC ${YOLOV6}
   PUBLIC ${BASE_DETECT}
   ${OpenCV_LIBRARIES}
   cudart
@@ -90,7 +89,7 @@ target_link_libraries(det_yolov5
 add_executable(track_bytetrack_yolov5 track_bytetrack_yolov5.cpp)
 target_link_libraries(track_bytetrack_yolov5
   PUBLIC ${BASE_DETECT}
-  PUBLIC ${YOLOV5}
+  PUBLIC ${YOLOV6}
   PUBLIC ${BYTETRACK}
   ${OpenCV_LIBRARIES}
   cudart

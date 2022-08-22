@@ -22,8 +22,6 @@ vector<Object> convert_yolov6Output_2_bytetrackInput(vector<Yolov6Output>& res) 
 int main (int argc, char** argv) {
     // model config
     const string model_path = "../../yolov6s.engine";
-    // int inputw = 1088;
-    // int inputh = 608;
     int inputw = 640;
     int inputh = 640;
     float nms_thresh = 0.7;

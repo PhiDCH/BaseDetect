@@ -11,11 +11,6 @@ mkdir build
 cd build && cmake .. && make && sudo make install && cd ../..
 
 cd $BASE_PATH
-cd yolov5
-mkdir build
-cd build && cmake .. && make && sudo make install && cd ../..
-
-cd $BASE_PATH
 cd yolov6
 mkdir build
 cd build && cmake .. && make && sudo make install && cd ../..
