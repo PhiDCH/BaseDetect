@@ -8,7 +8,7 @@ using namespace cv;
 
 int main (int argc, char** argv) {
     // model config
-    const string model_path = "../../yolov5s.engine";
+    const string model_path = "../../yolov7s.engine";
     int inputw = 640;
     int inputh = 640;
     float nms_thresh = 0.4;

@@ -1,8 +1,10 @@
 */build/*
 
 *.mp4
+*.avi
 *.jpg
 *.png
+*.jpeg
 
 .vscode/
 */.vscode/
@@ -10,4 +12,6 @@
 *.engine
 *.tar
 *.pth
+*.pt
+*.wts
 *.onnx
