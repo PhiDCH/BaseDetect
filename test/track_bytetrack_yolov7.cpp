@@ -38,8 +38,12 @@ int main (int argc, char** argv) {
     printMemInfo();
   
     // get input image (video)
-    const string input_path = string(argv[1]);
-    const string output_path = string(argv[2]);
+    string input_path = "../../palace.mp4";
+    string output_path = "../../yolov7.mp4";
+    if (argc>1) {
+        input_path = string(argv[1]);
+        output_path = string(argv[2]);
+    }
 
     VideoCapture cap(input_path);
     if (!cap.isOpened()) {
@@ -83,7 +87,7 @@ int main (int argc, char** argv) {
                         0, 0.6, Scalar(0, 0, 255), 2, LINE_AA);
             rectangle(img, Rect(tlwh[0], tlwh[1], tlwh[2], tlwh[3]), s, 2, LINE_AA);
 		}
-        putText(img, format("frame: %d fps: %d num: %d", frame_id, frame_id * 1000000 / total_ms, output_stracks.size()), Point(0, 30), 0, 0.6, Scalar(0, 0, 255), 2, LINE_AA);
+        putText(img, format("yolov7 frame: %d fps: %d num: %d", frame_id, frame_id * 1000000 / total_ms, output_stracks.size()), Point(0, 60), 0, 2, Scalar(0, 0, 255), 6, LINE_AA);
         writer.write(img);
     }
 
