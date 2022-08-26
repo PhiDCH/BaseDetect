@@ -79,5 +79,4 @@ python export.py --weights yolov7.pt --grid --simplify --topk-all 100 --img-size
 
 ## The results
 
-<video src="result1.mp4" controls="controls">
-</video>
+https://github.com/PhiDCH/BaseDetect/blob/develop/result1.mp4
