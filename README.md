@@ -28,9 +28,6 @@ cd bytetrack/build && cmake .. && sudo make install && cd ../..
 and build test code
 ```
 cd test/build && cmake .. && make 
-
-
-
 ```
 ## Or simply run setup bash file 
 ```
