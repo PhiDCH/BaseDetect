@@ -28,6 +28,9 @@ cd bytetrack/build && cmake .. && sudo make install && cd ../..
 and build test code
 ```
 cd test/build && cmake .. && make 
+
+
+
 ```
 ## Or simply run setup bash file 
 ```
@@ -79,4 +82,4 @@ python export.py --weights yolov7.pt --grid --simplify --topk-all 100 --img-size
 
 ## The results
 
-https://github.com/PhiDCH/BaseDetect/blob/develop/result1.mp4
+https://user-images.githubusercontent.com/59147911/186898705-ce150663-ff7f-4cd9-9f8b-84c38becdd1c.mp4
