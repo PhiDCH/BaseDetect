@@ -79,4 +79,5 @@ python export.py --weights yolov7.pt --grid --simplify --topk-all 100 --img-size
 
 ## The results
 
-![result](result1.mp4)
+<video src="result1.mp4" controls="controls">
+</video>
