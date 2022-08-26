@@ -76,3 +76,7 @@ python export.py --weights yolov7.pt --grid --simplify --topk-all 100 --img-size
 ```
 
 ## Int8 quantization (coming soon)
+
+## The results
+
+![result](result1.mp4)

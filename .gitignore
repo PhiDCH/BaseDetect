@@ -5,6 +5,7 @@
 *.jpg
 *.png
 *.jpeg
+*.gif
 
 .vscode/
 */.vscode/
@@ -15,3 +16,5 @@
 *.pt
 *.wts
 *.onnx
+
+*.ipynb
